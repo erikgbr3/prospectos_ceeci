@@ -5,15 +5,12 @@ import Modal from 'react-native-modal';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 import backendConfig from '../../../../../config/backend/config';
-
-import UsersResult from '../../../domain/entities/usersResult';
-import User from '../../../domain/entities/users';
-
 import SelectDropdown from 'react-native-select-dropdown';
-import CategorysResult from '../../../domain/entities/categoryResult';
-
-import Category from '../../../domain/entities/category';
-import SavingsResult from '../../../domain/entities/incomesResult';
+import StatusResult from '../../../domain/entities/statusResult';
+import Status from '../../../domain/entities/status';
+import AreaResult from '../../../domain/entities/areaResult';
+import Area from '../../../domain/entities/area';
+import { ScrollView } from 'react-native';
 
 interface AddUserModalProps {
   isVisible: boolean;
@@ -24,58 +21,62 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
 
   const { loading, user, setUserProp, saveUser} = useAddUserState();
 
-  const [income, setIncome] = useState([]);
-  const [categorys, setCategorys] = useState([]);
+  const [status, setStatus] = useState<Status[]>([]);
+  const [area, setArea] = useState<Area[]>([]);
 
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResult = await getUsers();
-        setIncome(SavingsResult.savings);
+        const statusResult = await getStatus();
+        if (statusResult) {
+          setStatus(statusResult.status);
+        }
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching status:', error);
       }
     };
-
+  
     fetchData();
   }, []);
 
-  const getUsers = async () => {
+  const getStatus = async () => {
     return fetch(`${backendConfig.url}/api/status`)
       .then((response) => response.json())
       .then((response) => {
         if (!response) {
-          return new UsersResult([]);
+          return new StatusResult([]);
         }
-        const user = response.map((item) => new User(item.username, item.id));
-        return new UsersResult(user);
+        const status = response.map((item: any) => new Status(item.rolName, item.id));
+        return new StatusResult(status);
       });
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const categorysResult = await getCategorys();
-        setCategorys(categorysResult.category);
+        const areaResult = await getArea();
+        if (areaResult) {
+          setArea(areaResult.area);
+        }
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Error fetching areas:', error);
       }
     };
-
+  
     fetchData();
   }, []);
 
-  const getCategorys = async () => {
+  const getArea = async () => {
     return fetch(`${backendConfig.url}/api/area`)
       .then((response) => response.json())
       .then((response) => {
         if (!response) {
-          return new CategorysResult([]);
+          return new AreaResult([]);
         }
-        const category = response.map((item) => new Category(item.name, item.id));
-        return new CategorysResult(category);
+        const area = response.map((item: any) => new Area(item.name, item.area, item.id));
+        return new AreaResult(area);
       });
   };
 
@@ -86,7 +87,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
     //updateSaving(); // Actualizar la lista de categorías
     closeModal();
     
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al guardar la categoría:", error);
       console.log("Respuesta del servidor:", error.response);
   
@@ -100,12 +101,14 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
 
   return (
     <Modal isVisible={isVisible}>
+      <ScrollView>
       <View style={styles.modalContainer}>
-        <Text style={styles.info}>Registrar Gasto</Text>
-        <Text style={styles.info2}>Descripción</Text>
+        <Text style={styles.info}>Registrar Prospecto</Text>
+        <View>
+        <Text style={styles.info2}>Nombre</Text>
         <View style={styles.inputView}>
           <TextInput style={styles.inputText}
-              placeholder="Escribe aqui"
+              placeholder="Escribe el Nombre"
               placeholderTextColor="#808080"
               value={user?.name || ''}
               onChangeText={(text) => {
@@ -114,11 +117,13 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               textContentType="name"
             />
           </View>
+          </View>
 
-          <Text style={styles.info2}>Costo</Text>
+        <View>
+          <Text style={styles.info2}>Apellido</Text>
         <View style={styles.inputView}>
           <TextInput style={styles.inputText}
-              placeholder="Escribe aqui"
+              placeholder="Escribe el Apellido"
               placeholderTextColor="#808080"
               value={user?.lastName || ''}
               onChangeText={(text) => {
@@ -127,14 +132,85 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               textContentType="name"
             />
           </View>
+          </View>
 
-          <Text style={styles.info2}>Selecciona Categoria</Text>
+          <View>
+          <Text style={styles.info2}>Teléfono</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe el Teléfono"
+              placeholderTextColor="#808080"
+              value={user?.phone || ''}
+              onChangeText={(text) => {
+                setUserProp('phone', text);
+              }}
+              textContentType="telephoneNumber"
+            />
+          </View>
+          </View>
+
+          <View>
+          <Text style={styles.info2}>Correo</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe el Correo"
+              placeholderTextColor="#808080"
+              value={user?.email || ''}
+              onChangeText={(text) => {
+                setUserProp('email', text);
+              }}
+              textContentType="emailAddress"
+            />
+          </View>
+          </View>
+
+          <View>
+          <Text style={styles.info2}>Dirección</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe la Direccion"
+              placeholderTextColor="#808080"
+              value={user?.address || ''}
+              onChangeText={(text) => {
+                setUserProp('address', text);
+              }}
+              textContentType="addressCityAndState"
+            />
+          </View>
+          </View>
+
+          <View>
+          <Text style={styles.info2}>Selecciona Status</Text>
           <View>
           <SelectDropdown
-            data={categorys}
+            data={status}
             onSelect={(selectedItem, index) => {
               if(selectedItem){
-                setUserProp('categoryId', selectedItem.id)
+                setUserProp('status', selectedItem.id)
+                console.log(selectedItem.id);
+              } else {
+                console.log("alerta de error");  
+              }
+            }}
+            buttonTextAfterSelection={(selectedItem, index) => {
+              return selectedItem.rolName;
+            }}
+            rowTextForSelection={(item, index) => {
+              return item.rolName;
+            }}
+          />
+        </View>
+        </View>
+
+        <View>
+          <Text style={styles.info2}>Selecciona  Área</Text>
+          <View>
+          <View>
+          <SelectDropdown
+            data={area}
+            onSelect={(selectedItem, index) => {
+              if(selectedItem){
+                setUserProp('area', selectedItem.id)
                 console.log(selectedItem.id);
               } else {
                 console.log("alerta de error, panal");  
@@ -148,33 +224,8 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
             }}
           />
         </View>
-
-          <Text style={styles.info2}>Selecciona un Usuario</Text>
-          <View>
-          <View>
-          <SelectDropdown
-            data={income}
-            onSelect={(selectedItem, index) => {
-              if(selectedItem){
-                setUserProp('clientId', selectedItem.id)
-                console.log(selectedItem.id);
-              } else {
-                console.log("alerta de error, panal");  
-              }
-            }}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              return selectedItem.username;
-            }}
-            rowTextForSelection={(item, index) => {
-              return item.username;
-            }}
-          />
         </View>
-
-          </View>11
-
-
-
+        </View>
         <View style={styles.buttonContainer}>
           
           <TouchableOpacity onPress={() => handleSaveUser()}>
@@ -189,6 +240,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
           </TouchableOpacity>
         </View>
       </View>
+      </ScrollView>
     </Modal>
   );
 };
@@ -214,7 +266,7 @@ const styles = StyleSheet.create({
 button: {
     width: 'auto',
     marginLeft: 8,
-    marginRight: 8
+    marginRight: 8  
 
 },
 info: {
@@ -252,6 +304,7 @@ inputText: {
   textAlign: 'center',
   alignContent: 'center',
   height: 50,
+  width: 150,
   color: "#333", // Texto oscuro
 },
 picker: {

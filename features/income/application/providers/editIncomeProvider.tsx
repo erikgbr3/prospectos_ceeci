@@ -1,11 +1,13 @@
 import { FC, ReactNode, createContext, useContext, useReducer } from "react";
 
-import Saving from "../../domain/entities/incomes";
+import Saving from "../../domain/entities/status";
 import SavingsRepositoryImp from "../../infraestructure/repositories/userRepositoryImp";
 import SavingsDatasourceImp from "../../infraestructure/datasources/userDatasourceImp";
 import User from "../../domain/entities/users";
 import UserRepositoryImp from "../../infraestructure/repositories/userRepositoryImp";
 import UserDatasourceImp from "../../infraestructure/datasources/userDatasourceImp";
+import Status from "../../domain/entities/status";
+import Area from "../../domain/entities/area";
 
 //definir la estructura que tendra mi context
 interface ContextDefinition {
@@ -37,7 +39,7 @@ interface EditUserState {
 type EditUserActionType =
   | { type: "Set Loading"; payload: boolean }
   | { type: "Set Saved"; payload: boolean }
-  | { type: "Set User"; payload: User };
+  | { type: "Set User"; payload: User }
 
 //inicializar el state
 const initialState: EditUserState = {
@@ -49,8 +51,9 @@ const initialState: EditUserState = {
     '',
     '',
     '',
-    0,
-    0
+    '',
+    new Status(''),
+    new Area('', ''),
     ),
 };
 
@@ -108,7 +111,7 @@ const EditUserProvider:FC<Props> = ({ children }) => {
 
     //si ya me mando, cerrar el modal
     const savedUser = await savingsRepository.addUser(state.user);
-    console.log(saveUser);
+    console.log(savedUser);
     dispatch({
       type: 'Set Saved',
       payload: false,
@@ -122,14 +125,13 @@ const EditUserProvider:FC<Props> = ({ children }) => {
     
 
   function setUser(user: User){
+
     dispatch({
         type: 'Set User',
-        payload: user
+        payload: user,
       });
 
-      
-
-  }
+  } 
 
   return (
     <EditUserContext.Provider value={{

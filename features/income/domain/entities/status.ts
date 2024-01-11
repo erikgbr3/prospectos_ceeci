@@ -1,6 +1,4 @@
-import categorysDatasource from "../datasourses/userDatasource";
-
-class Saving {
+class Status {
     
     id?: number;
     rolName: string;
@@ -17,4 +15,4 @@ class Saving {
         
     }
 }
-export default Saving;
+export default Status;

@@ -1,11 +1,15 @@
+import Area from "./area";
+import Status from "./status";
+
 class User {
     
     name: string;
     lastName: string;
     phone: string;
+    email: string;
     address: string;
-    status: number;
-    area: number;
+    status?: Status;
+    area?: Area;
     id?: number;
 
     constructor(
@@ -13,19 +17,21 @@ class User {
         name: string,
         lastName: string,
         phone: string,
+        email: string,
         address: string,
-        status: number,
-        area: number,
+        status?: Status,
+        area?: Area,
         id?: number,
 
     ) {
         
         this.name = name;
-        this.lastName = lastName,
-        this.phone = phone,
-        this.address = address,
-        this.status = status,
-        this.area = area,
+        this.lastName = lastName;
+        this.phone = phone;
+        this.email = email;
+        this.address = address;
+        this.status = status;
+        this.area = area;
         this.id = id;
     }
 }

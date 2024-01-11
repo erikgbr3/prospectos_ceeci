@@ -1,9 +1,9 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import Modal from 'react-native-modal';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import Saving from '../../../domain/entities/incomes';
+import Saving from '../../../domain/entities/status';
 import {EditUserProvider, useEditUserState } from '../../providers/editIncomeProvider';
 import React, { useEffect, useState} from 'react';
 import backendConfig from '../../../../../config/backend/config';
@@ -13,8 +13,12 @@ import UsersResult from '../../../domain/entities/usersResult';
 
 import User from '../../../domain/entities/users';
 
-import CategorysResult from '../../../domain/entities/categoryResult';
-import Category from '../../../domain/entities/category';
+import CategorysResult from '../../../domain/entities/areaResult';
+import Category from '../../../domain/entities/area';
+import Status from '../../../domain/entities/status';
+import Area from '../../../domain/entities/area';
+import StatusResult from '../../../domain/entities/statusResult';
+import AreaResult from '../../../domain/entities/areaResult';
 
 
 interface UserEditViewProps {
@@ -44,15 +48,9 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     } = useEditUserState();
 
     
-    const [
-        users,
-         setUsers
-    ] = useState([]);
+    const [status, setStatus] = useState<Status[]>([]);
 
-    const [
-      categorys,
-       setCategorys
-    ] = useState([]);
+    const [area, setArea] = useState<Area[]>([]);
 
     //al recibir el usuario a editar, pasarlo al proveedor de estado
 
@@ -63,91 +61,170 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const categorysResult = await getCategorys();
-          setCategorys(categorysResult.category);
+          const statusResult = await getStatus();
+          if (statusResult) {
+            setStatus(statusResult.status);
+          }
         } catch (error) {
-          console.error('Error fetching users:', error);
+          console.error('Error fetching status:', error);
         }
       };
-  
+    
       fetchData();
     }, []);
   
-    const getCategorys = async () => {
-      return fetch(`${backendConfig.url}/api/area`)
+    const getStatus = async () => {
+      return fetch(`${backendConfig.url}/api/status`)
         .then((response) => response.json())
         .then((response) => {
           if (!response) {
-            return new CategorysResult([]);
+            return new StatusResult([]);
           }
-          const category = response.map((item:any) => new Category(item.name, item.id));
-          return new CategorysResult(category);
+          const status = response.map((item: any) => new Status(item.rolName, item.id));
+          return new StatusResult(status);
         });
     };
 
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const usersResult = await getUsers();
-          setUsers(usersResult.user);
+          const areaResult = await getArea();
+          if (areaResult) {
+            setArea(areaResult.area);
+          }
         } catch (error) {
-          console.error('Error fetching users:', error);
+          console.error('Error fetching areas:', error);
         }
       };
-  
+    
       fetchData();
     }, []);
   
-    const getUsers = async () => {
-      return fetch(`${backendConfig.url}/api/status`)
+    const getArea = async () => {
+      return fetch(`${backendConfig.url}/api/area`)
         .then((response) => response.json())
         .then((response) => {
           if (!response) {
-            return new UsersResult([]);
+            return new AreaResult([]);
           }
-          const user = response.map((item) => new User(item.name, item.id));
-          return new UsersResult(user);
+          const area = response.map((item: any) => new Area(item.name, item.area, item.id));
+          return new AreaResult(area);
         });
     };
+  
     
     return (
-        <Modal isVisible={isVisible}>
-        <View style={styles.modalContainer}>
-            <Text style={styles.info}>Actualizar Ingreso</Text>
+      <Modal isVisible={isVisible}>
+      <ScrollView>
+      <View style={styles.modalContainer}>
+        <Text style={styles.info}>Registrar Prospecto</Text>
+        <View>
+        <Text style={styles.info2}>Nombre</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe el Nombre"
+              placeholderTextColor="#808080"
+              value={user?.name || ''}
+              onChangeText={(text) => {
+                setUserProp('name', text);
+              }}
+              textContentType="name"
+            />
+          </View>
+          </View>
 
-            <View style={styles.inputView}>
-            <TextInput style={styles.inputText}
-                placeholder="Escribe aqui"
-                placeholderTextColor="#808080"
-                value={user?.name || ''}
-                onChangeText={(text) => {
-                    setUserProp('name', text);
-                }}
-                textContentType="name"
-                />
-            </View>
+        <View>
+          <Text style={styles.info2}>Apellido</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe el Apellido"
+              placeholderTextColor="#808080"
+              value={user?.lastName || ''}
+              onChangeText={(text) => {
+                setUserProp('lastName', text);
+              }}
+              textContentType="name"
+            />
+          </View>
+          </View>
 
-            <Text style={styles.info}>Actualizar Ingreso</Text>
+          <View>
+          <Text style={styles.info2}>Teléfono</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe el Teléfono"
+              placeholderTextColor="#808080"
+              value={user?.phone || ''}
+              onChangeText={(text) => {
+                setUserProp('phone', text);
+              }}
+              textContentType="telephoneNumber"
+            />
+          </View>
+          </View>
 
-            <View style={styles.inputView}>
-            <TextInput style={styles.inputText}
-                placeholder="Escribe aqui"
-                placeholderTextColor="#808080"
-                value={user?.lastName || ''}
-                onChangeText={(text) => {
-                    setUserProp('lastName', text);
-                }}
-                textContentType="name"
-                />
-            </View>
+          <View>
+          <Text style={styles.info2}>Correo</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe el Correo"
+              placeholderTextColor="#808080"
+              value={user?.email || ''}
+              onChangeText={(text) => {
+                setUserProp('email', text);
+              }}
+              textContentType="emailAddress"
+            />
+          </View>
+          </View>
 
-            <Text style={styles.info2}>Selecciona Categoria</Text>
+          <View>
+          <Text style={styles.info2}>Dirección</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe la Direccion"
+              placeholderTextColor="#808080"
+              value={user?.address || ''}
+              onChangeText={(text) => {
+                setUserProp('address', text);
+              }}
+              textContentType="addressCityAndState"
+            />
+          </View>
+          </View>
+
+          <View>
+          <Text style={styles.info2}>Selecciona Status</Text>
           <View>
           <SelectDropdown
-            data={categorys}
+            data={status}
             onSelect={(selectedItem, index) => {
               if(selectedItem){
-                setUserProp('categoryId', selectedItem.id)
+                setUserProp('status', selectedItem.id)
+                console.log(selectedItem.id);
+              } else {
+                console.log("alerta de error");  
+              }
+            }}
+            buttonTextAfterSelection={(selectedItem, index) => {
+              return selectedItem.rolName;
+            }}
+            rowTextForSelection={(item, index) => {
+              return item.rolName;
+            }}
+          />
+        </View>
+        </View>
+
+        <View>
+          <Text style={styles.info2}>Selecciona  Área</Text>
+          <View>
+          <View>
+          <SelectDropdown
+            data={area}
+            onSelect={(selectedItem, index) => {
+              if(selectedItem){
+                setUserProp('area', selectedItem.id)
                 console.log(selectedItem.id);
               } else {
                 console.log("alerta de error, panal");  
@@ -161,27 +238,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
             }}
           />
         </View>
-
-
-            <Text style={styles.info2}>Selecciona un Usuario</Text>
-          <View>
-          <SelectDropdown
-            data={users}
-            onSelect={(selectedItem, index) => {
-              if(selectedItem){
-                setUserProp('clientId', selectedItem.id)
-                console.log(selectedItem.id);
-              } else {
-                console.log("alerta de error, panal");  
-              }
-            }}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              return selectedItem.name;
-            }}
-            rowTextForSelection={(item, index) => {
-              return item.name;
-            }}
-          />
+        </View>
         </View>
 
             <View style={styles.buttonContainer}>
@@ -198,6 +255,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
             </TouchableOpacity>
             </View>
         </View>
+        </ScrollView>
         </Modal>
     );
     };

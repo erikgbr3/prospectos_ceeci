@@ -1,20 +1,22 @@
 import AddUsersResult from "../entities/addUserResult";
-import CategorysResult from "../entities/categoryResult";
-import Saving from "../entities/incomes";
-import SavingsResult from "../entities/incomesResult";
+import AreaResult from "../entities/areaResult";
+import CategorysResult from "../entities/areaResult";
+import StatusResult from "../entities/statusResult";
 import User from "../entities/users";
 import UsersResult from "../entities/usersResult";
 
 
 abstract class UserRepository {
     // tendra una funcion para ller los personajes por numero de pagina, y retonarlos
+    abstract getStatus() : Promise<StatusResult>;
+
     abstract addUser(user: User): Promise<AddUsersResult>;
 
     abstract deleteUser(user:User): Promise<AddUsersResult>;
     
     abstract getUsers() : Promise<UsersResult>;
     
-    abstract getCategorys() : Promise<CategorysResult>;
+    abstract getArea() : Promise<AreaResult>;
 
 }
 

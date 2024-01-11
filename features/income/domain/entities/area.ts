@@ -1,4 +1,4 @@
-class Category {
+class Area {
     
     id?: number;
     name: string;
@@ -16,4 +16,4 @@ class Category {
         this.area = area;
     }
 }
-export default Category;
+export default Area;

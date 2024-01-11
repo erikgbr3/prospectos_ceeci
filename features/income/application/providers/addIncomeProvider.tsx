@@ -2,6 +2,8 @@ import { FC, ReactNode, createContext, useContext, useReducer } from "react";
 import User from "../../domain/entities/users";
 import UserRepositoryImp from "../../infraestructure/repositories/userRepositoryImp";
 import UserDatasourceImp from "../../infraestructure/datasources/userDatasourceImp";
+import Status from "../../domain/entities/status";
+import Area from "../../domain/entities/area";
 
 //definir la estructura que tendra mi context
 interface ContextDefinition {
@@ -43,8 +45,9 @@ const initialState: AddUserState = {
     '',
     '',
     '',
-    0,
-    0
+    '',
+    new Status(''),
+    new Area('', ''),
     ),
 };
 

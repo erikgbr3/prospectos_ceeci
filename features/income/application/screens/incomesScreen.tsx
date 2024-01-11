@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import SavingCard from './components/incomesCard';
 
 //import { SavingsProvider, useSavingsState } from '../providers/SavingsProvider';
-import {UsersProvider, useUsersState } from '../providers/IncomesProvider'; //la ultima carpeta no se llama asi, error y no error
+import { UsersProvider, useUsersState } from '../providers/IncomesProvider'; //la ultima carpeta no se llama asi, error y no error
 
 
 import { Button } from 'react-native-paper';
@@ -108,8 +108,8 @@ const styles = StyleSheet.create({
     marginLeft: '5%'
   },
   buttonContainer: {
-    alignItems: 'center',
-    marginTop: 10,
+    alignItems: 'flex-end',
+    marginTop: 40,
     marginBottom: 10,
   },
   button: {

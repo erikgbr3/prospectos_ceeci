@@ -91,10 +91,13 @@ const SavingCard: React.FC<CardProps> = ({
            
                     <View>
                         <View style={styles.cardInfo}>
-                        <Text style={styles.info}>Id: {user.id}</Text>
                         <Text style={styles.info}>Nombre: {user.name}</Text>
                         <Text style={styles.info}>Apellido: {user.lastName}</Text>
-                        
+                        <Text style={styles.info}>Teléfono: {user.phone}</Text>
+                        <Text style={styles.info}>Correo: {user.email}</Text>
+                        <Text style={styles.info}>Dirección: {user.address}</Text>
+                        <Text style={styles.info}>Estatus: {user.status?.rolName}</Text>
+                        <Text style={styles.info}>Curso: {user.area?.name}</Text>
                         </View>
             
                     </View> 
