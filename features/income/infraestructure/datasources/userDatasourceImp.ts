@@ -1,6 +1,5 @@
 import Saving from "../../domain/entities/status";
 import User from "../../domain/entities/users";
-import Category from "../../domain/entities/area";
 import SavingsResult from "../../domain/entities/statusResult";
 import UsersResult from "../../domain/entities/usersResult";
 import CategorysResult from "../../domain/entities/areaResult";
@@ -52,9 +51,10 @@ class UserDatasourceImp extends UserDatasource {
         result.errors = response.errors || null;
         result.error = response.error || false;
 
-        return result;
+        return result; 
       });
     }
+
     async deleteUser(user: User): Promise<AddUsersResult> {
         return fetch(`${BackendConfig.url}/api/user?id=${user.id}`, {
             method: 'DELETE',
@@ -93,7 +93,6 @@ class UserDatasourceImp extends UserDatasource {
                     item.id
                 );
     
-                // Asignar los atributos relacionados
                 user.status = new Status(item.statusId.rolName, item.statusId.id);
                 user.area = new Area(item.courses.name, item.courses.area, item.courses.id);
     

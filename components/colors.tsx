@@ -1,13 +1,5 @@
 const pastelColors = [
-    
-    "#ff6961",
-    "#77dd77",
-    "#FFD700",
-    "#84b6f4",
-    "#ba9df4",
-    "#F7CAC9",
-    "#a3ffac",
-    "#FAD7A0",
+  "#a0c9c7",
   ];
   
   let currentIndex = 0;

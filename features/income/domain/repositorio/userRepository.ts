@@ -1,6 +1,5 @@
 import AddUsersResult from "../entities/addUserResult";
 import AreaResult from "../entities/areaResult";
-import CategorysResult from "../entities/areaResult";
 import StatusResult from "../entities/statusResult";
 import User from "../entities/users";
 import UsersResult from "../entities/usersResult";

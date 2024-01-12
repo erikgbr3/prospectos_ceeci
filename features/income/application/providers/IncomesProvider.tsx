@@ -95,13 +95,13 @@ const UsersProvider:FC<Props> = ({ children }) => {
         const apiResult = await reposirtory.getUsers();
 
         dispatch({
-            type: 'Set Data',
+            type: 'Set Data',   
             payload: apiResult,
         });
     };
 
     function setUserSelected (user: User | null) {
-   
+        console.log(user);
         dispatch({
             type: 'Set User Selected',
             payload: user,
@@ -111,6 +111,7 @@ const UsersProvider:FC<Props> = ({ children }) => {
     function onUpdateUser(user: User) {
         //buscar el registro en category y reemplazarlo
         //actualizar el estado category
+        console.log(user)
         const usersClone = [...state.users];
         const index = usersClone.findIndex((item)=> item.id == user.id);
         usersClone.splice(index, 1, user);

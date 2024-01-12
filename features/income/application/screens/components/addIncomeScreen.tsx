@@ -11,6 +11,7 @@ import Status from '../../../domain/entities/status';
 import AreaResult from '../../../domain/entities/areaResult';
 import Area from '../../../domain/entities/area';
 import { ScrollView } from 'react-native';
+import BackendConfig from '../../../../../config/backend/config';
 
 interface AddUserModalProps {
   isVisible: boolean;
@@ -42,7 +43,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
   }, []);
 
   const getStatus = async () => {
-    return fetch(`${backendConfig.url}/api/status`)
+    return fetch(`${BackendConfig.url}/api/status`)
       .then((response) => response.json())
       .then((response) => {
         if (!response) {
@@ -69,7 +70,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
   }, []);
 
   const getArea = async () => {
-    return fetch(`${backendConfig.url}/api/area`)
+    return fetch(`${BackendConfig.url}/api/area`)
       .then((response) => response.json())
       .then((response) => {
         if (!response) {

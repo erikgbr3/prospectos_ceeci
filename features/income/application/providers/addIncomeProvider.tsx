@@ -48,6 +48,7 @@ const initialState: AddUserState = {
     '',
     new Status(''),
     new Area('', ''),
+    undefined,
     ),
 };
 

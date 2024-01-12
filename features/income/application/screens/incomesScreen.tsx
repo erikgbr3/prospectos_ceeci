@@ -1,19 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import SavingCard from './components/incomesCard';
-
-//import { SavingsProvider, useSavingsState } from '../providers/SavingsProvider';
-import { UsersProvider, useUsersState } from '../providers/IncomesProvider'; //la ultima carpeta no se llama asi, error y no error
-
-
-import { Button } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Cambia MaterialIcons por el conjunto de íconos que desees usar
-
-
+import { UsersProvider, useUsersState } from '../providers/IncomesProvider'; 
+import { Button, TextInput } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import AddSavingScreen from './components/addIncomeScreen';
-
-
 import EditSavingScreen from './components/incomeEditModal';
+import User from '../../domain/entities/users';
 
 const SavingsScreenView = () => {
 
@@ -30,33 +23,75 @@ const SavingsScreenView = () => {
 
   const [isModalVisible, setModalVisible] = useState(false);
 
+  const [isDataUpdated, setDataUpdated] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState('');
+
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
 
+  const handleDataUpdate = () => {
+    getUsers();
+    setDataUpdated(false);
+  };
+
+  useEffect(() => {
+    if (isDataUpdated) {
+      handleDataUpdate();
+    }
+  }, [isDataUpdated]);
+
   const renderCards = () => {
-    if(!users)
-    {
+    if (users == null) {
       return null;
     }
+  
+    const filteredUsers = users.filter((user) => {
+      if (!user) {
+        return false; // O cualquier lógica que desees para manejar el caso de user siendo undefined
+      }
     
-    return users?.map((user) => (
-      <SavingCard 
-      key={`user${user.id}`} 
-      user={user} 
-      onEdit={setUserSelected}
+      const fullName = `${user.name} ${user.lastName}`;
+      return fullName.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+  
+    return filteredUsers.map((user) => (
+      <SavingCard
+        key={`user${user.id}`}
+        user={user}
+        onEdit={setUserSelected}
+        searchTerm={searchTerm}
       />
-      )
-    );
-  }
+    ));
+  };
 
   useEffect(() => {
     getUsers();
   }, []);
 
-    return (
-    <ScrollView>
+  useEffect(() => {
+    console.log('Users:', users);
+  }, [users]);
 
+  useEffect(() => {
+      console.log('User Selected:', userSelected);
+  }, [userSelected]);
+
+    return (
+    <View>
+      <View>
+        <Text style={styles.title}>Prospectos</Text>
+      </View>
+    <View>
+      <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar..."
+          value={searchTerm}
+          onChangeText={(text) => setSearchTerm(text)}
+      />
+    </View>
+    <ScrollView>
     <View style={styles.buttonContainer}>
       <Button style={styles.button} buttonColor='#6a9eda' mode="contained" onPress={toggleModal}>
           <Icon name="add" size={25} color="white" />
@@ -72,7 +107,10 @@ const SavingsScreenView = () => {
       
       <AddSavingScreen 
       isVisible={isModalVisible} 
-      closeModal={toggleModal}
+      closeModal={() => {
+        toggleModal();
+        setDataUpdated(true); // Establece isDataUpdated a true después de añadir un nuevo usuario
+      }}
       />
 
       {!!userSelected ? (
@@ -80,15 +118,17 @@ const SavingsScreenView = () => {
         <EditSavingScreen
         userEdit={userSelected}
         isVisible={!!userSelected}
-        onSaved={onUpdateUser}
+        onSaved={(updatedUser: User) => {
+          onUpdateUser(updatedUser);
+          setDataUpdated(true); // Establece isDataUpdated a true después de editar un usuario
+        }}
         closeModal={setUserSelected}
         />
 
       ) : null }
-      
-      
   
     </ScrollView>
+    </View>
   );
 }
 
@@ -107,9 +147,23 @@ const styles = StyleSheet.create({
     marginRight: '2%',
     marginLeft: '5%'
   },
+  title: {
+    fontSize: 30,
+    textAlign: 'center',
+    marginTop: 30
+  },
+  searchInput: {
+    height: 40,
+    color: 'white',
+    borderColor: 'white',
+    borderWidth: 1,
+    margin: 10,
+    paddingLeft: 10,
+    marginTop: 10,
+  },
   buttonContainer: {
-    alignItems: 'flex-end',
-    marginTop: 40,
+    alignItems: 'center',
+    marginTop: 10,
     marginBottom: 10,
   },
   button: {

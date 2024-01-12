@@ -1,8 +1,4 @@
 import { FC, ReactNode, createContext, useContext, useReducer } from "react";
-
-import Saving from "../../domain/entities/status";
-import SavingsRepositoryImp from "../../infraestructure/repositories/userRepositoryImp";
-import SavingsDatasourceImp from "../../infraestructure/datasources/userDatasourceImp";
 import User from "../../domain/entities/users";
 import UserRepositoryImp from "../../infraestructure/repositories/userRepositoryImp";
 import UserDatasourceImp from "../../infraestructure/datasources/userDatasourceImp";
@@ -14,8 +10,10 @@ interface ContextDefinition {
   //definición del estado
   loading: boolean;
   saved: boolean,
-  message?: string,
+  success: boolean,
+  message: string | null,
   user: User,
+  errors: any,
   
 
   // acciones que tendrá mi context
@@ -31,31 +29,46 @@ interface EditUserState {
   //definición del estado
   loading: boolean;
   saved: boolean,
-  message?: string,
+  success: boolean,
+  message: string | null,
   user: User,
+  errors: any,
 }
 
 //definir los tipos de acciones que podra ejecutar el context / providers
 type EditUserActionType =
   | { type: "Set Loading"; payload: boolean }
   | { type: "Set Saved"; payload: boolean }
+  | { type: 'Set Success', payload: { 
+    success: boolean, 
+    user?: User,
+    message: string,
+  
+  } }
   | { type: "Set User"; payload: User }
+  | { type: 'Set Message', payload: string | null}
+  | { type: 'Set Errors', payload: {
+    message: string,
+    errors: any
+  }};
 
-//inicializar el state
-const initialState: EditUserState = {
-  loading: false,
-  saved: false,
-  message: undefined,
-  user: new User(
-    '',
-    '',
-    '',
-    '',
-    '',
-    new Status(''),
-    new Area('', ''),
-    ),
-};
+  const initialState: EditUserState = {
+    loading: false,
+    saved: false,
+    success: false,
+    message: null,
+    user: new User(
+      '',
+      '',
+      '',
+      '',
+      '',
+      new Status(''),
+      new Area('', ''),
+      undefined,
+      ),
+    errors: {},
+  };
 
 function EditSavingReducer(
   state: EditUserState, 
@@ -75,6 +88,24 @@ function EditSavingReducer(
         ...state,
         user: action.payload,
       }
+
+      case "Set Success":
+        return {
+          ...state,
+          success: action.payload.success,
+          message: action.payload.message,
+          errors: {},
+          saving: false,
+        }
+
+        case 'Set Errors':
+          return {
+            ...state,
+            errors: action.payload.errors || {},
+            message: action.payload.message,
+            saving: false,
+          }
+
     default:
       return state;
   }
@@ -99,6 +130,12 @@ const EditUserProvider:FC<Props> = ({ children }) => {
   }
 
   async function saveUser(onSaved: Function) {
+
+    if (!state.user || !state.user.id) {
+      console.error('User or user id is undefined');
+      return;
+    }
+
     const savingsRepository = new UserRepositoryImp(
       new UserDatasourceImp
     )
@@ -108,17 +145,45 @@ const EditUserProvider:FC<Props> = ({ children }) => {
       payload: true,
     });
 
-
+    console.log(state.user)
     //si ya me mando, cerrar el modal
-    const savedUser = await savingsRepository.addUser(state.user);
-    console.log(savedUser);
-    dispatch({
-      type: 'Set Saved',
-      payload: false,
+    const result = await savingsRepository.addUser(state.user);
+    console.log(result);
+
+    if (Array.isArray(result.user)) {
+      console.error('Unexpected user data format');
+      return;
+    }
+    
+    if(result.user) {
+      dispatch({
+        type: 'Set Success',
+        payload: {
+          success: true,
+          user: result.user,
+          message: result.message,
+        }
+      });
+
+      onSaved(state.user)
+      return;
+    }
+
+    let errors : any = {};
+
+    result.errors?.forEach((item) => {
+      errors[item.field] = item.error;
     });
 
-    onSaved(state.user);
-    return;
+    dispatch({
+      type: 'Set Errors',
+      payload: {
+        message: result.message,
+        errors,
+      }
+    });
+
+    onSaved(state.user)
     
   }
 

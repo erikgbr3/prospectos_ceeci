@@ -2,24 +2,15 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView } from 
 import Modal from 'react-native-modal';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
-import Saving from '../../../domain/entities/status';
 import {EditUserProvider, useEditUserState } from '../../providers/editIncomeProvider';
 import React, { useEffect, useState} from 'react';
-import backendConfig from '../../../../../config/backend/config';
-
 import SelectDropdown from 'react-native-select-dropdown';
-import UsersResult from '../../../domain/entities/usersResult';
-
 import User from '../../../domain/entities/users';
-
-import CategorysResult from '../../../domain/entities/areaResult';
-import Category from '../../../domain/entities/area';
 import Status from '../../../domain/entities/status';
 import Area from '../../../domain/entities/area';
 import StatusResult from '../../../domain/entities/statusResult';
 import AreaResult from '../../../domain/entities/areaResult';
-
+import BackendConfig from '../../../../../config/backend/config';
 
 interface UserEditViewProps {
 
@@ -39,7 +30,6 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     const { 
         loading,
         saved, 
-
         user, 
 
         setUserProp, 
@@ -55,8 +45,9 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     //al recibir el usuario a editar, pasarlo al proveedor de estado
 
     useEffect(() => {
-        setUser(userEdit)
-    }, [userEdit]);
+      console.log('User in EditUserModal:', user);
+      setUser(userEdit);
+  }, [userEdit]);
 
     useEffect(() => {
       const fetchData = async () => {
@@ -74,7 +65,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     }, []);
   
     const getStatus = async () => {
-      return fetch(`${backendConfig.url}/api/status`)
+      return fetch(`${BackendConfig.url}/api/status`)
         .then((response) => response.json())
         .then((response) => {
           if (!response) {
@@ -101,7 +92,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     }, []);
   
     const getArea = async () => {
-      return fetch(`${backendConfig.url}/api/area`)
+      return fetch(`${BackendConfig.url}/api/area`)
         .then((response) => response.json())
         .then((response) => {
           if (!response) {
@@ -200,7 +191,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
             data={status}
             onSelect={(selectedItem, index) => {
               if(selectedItem){
-                setUserProp('status', selectedItem.id)
+                setUserProp('status', selectedItem.id);
                 console.log(selectedItem.id);
               } else {
                 console.log("alerta de error");  
@@ -227,7 +218,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
                 setUserProp('area', selectedItem.id)
                 console.log(selectedItem.id);
               } else {
-                console.log("alerta de error, panal");  
+                console.log("alerta de error");  
               }
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
@@ -244,9 +235,9 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
             <View style={styles.buttonContainer}>
             
             <TouchableOpacity onPress={() => saveUser(onSaved)}>
-                <Button style={styles.button} buttonColor='#f45572' >
-                    <Icon name="check" size={20} color="white" /> 
-                </Button>
+              <Button style={styles.button} buttonColor='#f45572' >
+                <Icon name="check" size={20} color="white" /> 
+              </Button>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => closeModal(null)}> 
                 <Button style={styles.button} buttonColor='#6a9eda'>
@@ -260,11 +251,11 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     );
     };
 
-const EditSavingScreen = (props: UserEditViewProps) => (
-        <EditUserProvider>
+    const EditSavingScreen = (props: any) => (
+      <EditUserProvider>
           <EditUserModal {...props} />
-        </EditUserProvider>
-);
+      </EditUserProvider>
+    );
 
 const styles = StyleSheet.create({
   modalContainer: {

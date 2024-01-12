@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { Button } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Cambia MaterialIcons por el conjunto de íconos que desees usar
-
-
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { getNextColor } from '../../../../../components/colors';
 import backendConfig from "../../../../../config/backend/config";
 import ConfirmationModal from '../../../../../components/modal';
 import User from '../../../domain/entities/users';
 
-
 type CardProps = {
     user : User,
     onEdit?: Function,
+    searchTerm: string;
 }
-
 
 const SavingCard: React.FC<CardProps> = ({
     user,
     onEdit,
+    searchTerm,
 }) => {
 
     const [isModalVisible, setModalVisible] = useState(false);
@@ -28,12 +26,18 @@ const SavingCard: React.FC<CardProps> = ({
 
     const [currentColor, setCurrentColor] = useState(getNextColor());
 
+    const isMatch = () => {
+        const fullName = `${user.name} ${user.lastName}`;
+        return fullName.toLowerCase().includes(searchTerm.toLowerCase());
+      };
+    
+      // No renderizar el componente si no coincide con la búsqueda
+      if (!isMatch()) {
+        return null;
+      }
+
     const toggleModal = () => {
         setModalVisible(!isModalVisible);
-    };
-
-    const toggleModalEdit = () => {
-        setModalVisibleE(!isModalVisibleE);
     };
 
     const handleEdit = () => {
@@ -86,7 +90,7 @@ const SavingCard: React.FC<CardProps> = ({
     return (
 
             <View style={styles.container}>
-            
+                <View style={styles.space}>
                 <TouchableOpacity style={{ ...styles.cardContainer, backgroundColor: currentColor}}>
            
                     <View>
@@ -102,10 +106,9 @@ const SavingCard: React.FC<CardProps> = ({
             
                     </View> 
                 </TouchableOpacity>
-                <View style={styles.buttonContainer}>
-                    
+                <View style={styles.buttonContainer}>    
                     <Button style={styles.button} buttonColor='#6a9eda' onPress={handleEdit}>
-                        <Icon name="refresh" size={20} color="white" /> 
+                        <Icon name="edit" size={20} color="white" /> 
                     </Button>
 
                     <Button style={styles.button} buttonColor='#f45572' onPress={() => toggleModal()}>
@@ -116,6 +119,7 @@ const SavingCard: React.FC<CardProps> = ({
                         onAccept={confirmDelete}
                         onCancel={toggleModal}
                     />
+                </View>
                 </View>
             </View>
         
@@ -132,23 +136,35 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         display:'flex',
         height:'auto',
-        width: 'auto', 
-        
+        width: 'auto',
     },
-    
-    cardContainer: {
+    space: {
 
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        // Propiedades específicas de la sombra en Android
+        elevation: 5,
+        // Propiedades específicas de la sombra en iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        marginRight: 11,
+        marginTop: 5,
+        marginBottom: 5,
+        paddingBottom: 7
+    },
+    cardContainer: {
         padding: 8,
         borderRadius: 14,
         border: 1,
-        minWidth: '90%',
+        minWidth: '95%',
         overflow: "hidden",
-        margin: 9
+        margin: 9,
     },
 
     cardInfo: {
-        padding: 8
-       
+        padding: 8,
     },
 
     info: {
