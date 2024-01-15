@@ -6,7 +6,6 @@ import { Button, TextInput } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AddSavingScreen from './components/addIncomeScreen';
 import EditSavingScreen from './components/incomeEditModal';
-import User from '../../domain/entities/users';
 
 const SavingsScreenView = () => {
 
@@ -28,12 +27,17 @@ const SavingsScreenView = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const toggleModal = () => {
+    console.log('isModalVisible before toggle:', isModalVisible);
     setModalVisible(!isModalVisible);
   };
 
   const handleDataUpdate = () => {
     getUsers();
     setDataUpdated(false);
+  };
+
+  const handleUpdateUser = () => {
+    setDataUpdated(true);
   };
 
   useEffect(() => {
@@ -52,7 +56,7 @@ const SavingsScreenView = () => {
         return false; // O cualquier lógica que desees para manejar el caso de user siendo undefined
       }
     
-      const fullName = `${user.name} ${user.lastName}`;
+      const fullName = `${user.name} ${user.lastname}`;
       return fullName.toLowerCase().includes(searchTerm.toLowerCase());
     });
   
@@ -79,24 +83,32 @@ const SavingsScreenView = () => {
   }, [userSelected]);
 
     return (
-    <View>
+    <View >
       <View>
         <Text style={styles.title}>Prospectos</Text>
       </View>
-    <View>
-      <TextInput
-          style={styles.searchInput}
-          placeholder="Buscar..."
-          value={searchTerm}
-          onChangeText={(text) => setSearchTerm(text)}
-      />
-    </View>
+      <View>
+        <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar..."
+            value={searchTerm}
+            onChangeText={(text) => setSearchTerm(text)}
+        />
+      </View>
+      
+      <View style={styles.buttonContainer}>
+        
+          <Button style={styles.button} buttonColor='#6a9eda' mode="contained" onPress={toggleModal}>
+              <Icon name="add" size={20} color="white" />
+          </Button>
+
+          <Button style={styles.button2} buttonColor='#6a9eda' mode="contained" onPress={handleDataUpdate}>
+              <Icon name="refresh" size={20} color="white" />
+          </Button>
+
+      </View>
+      
     <ScrollView>
-    <View style={styles.buttonContainer}>
-      <Button style={styles.button} buttonColor='#6a9eda' mode="contained" onPress={toggleModal}>
-          <Icon name="add" size={25} color="white" />
-      </Button>
-    </View>
    
       <View style={styles.container}>
       
@@ -114,20 +126,19 @@ const SavingsScreenView = () => {
       />
 
       {!!userSelected ? (
-
         <EditSavingScreen
         userEdit={userSelected}
         isVisible={!!userSelected}
-        onSaved={(updatedUser: User) => {
-          onUpdateUser(updatedUser);
-          setDataUpdated(true); // Establece isDataUpdated a true después de editar un usuario
+        onSaved={() => {
+          onUpdateUser(userSelected); // Pasa el usuario actualizado como argumento
+          handleUpdateUser();
         }}
         closeModal={setUserSelected}
         />
-
       ) : null }
   
     </ScrollView>
+    
     </View>
   );
 }
@@ -141,7 +152,6 @@ const IncomesScreen = (props: any) => (
 
 const styles = StyleSheet.create({
   container: {
-    //flex: 1,
     alignItems: 'center',
     flexWrap: 'wrap',
     marginRight: '2%',
@@ -162,15 +172,23 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   buttonContainer: {
-    alignItems: 'center',
+    flexDirection: 'row',
     marginTop: 10,
     marginBottom: 10,
   },
   button: {
-    width: 'auto',
+    width: 70,
     height: 70,
-    justifyContent:'center'
-
+    justifyContent:'center',
+    marginLeft: '30%',
+    marginRight: 10
+  },
+  button2: {
+    width: 70,
+    height: 70,
+    justifyContent:'center',
+    marginLeft: 10,
+    marginRight: '30%'
   }
 
 });

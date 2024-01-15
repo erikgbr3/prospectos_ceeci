@@ -11,14 +11,14 @@ interface ContextDefinition {
   loading: boolean;
   saved: boolean,
   success: boolean,
-  message: string | null,
+  message?: string,
   user: User,
   errors: any,
   
 
   // acciones que tendrá mi context
   setUserProp: (property: string, value: any) => void,
-  saveUser: (onSaved: Function) => void,
+  saveUser: (onSaved: Function) => void;
   setUser: (user: User) => void;
 }
 
@@ -30,7 +30,7 @@ interface EditUserState {
   loading: boolean;
   saved: boolean,
   success: boolean,
-  message: string | null,
+  message?: string,
   user: User,
   errors: any,
 }
@@ -56,12 +56,16 @@ type EditUserActionType =
     loading: false,
     saved: false,
     success: false,
-    message: null,
+    message: '',
     user: new User(
       '',
       '',
       '',
       '',
+      '',
+      '',
+      0,
+      0,
       '',
       new Status(''),
       new Area('', ''),
@@ -78,6 +82,7 @@ function EditSavingReducer(
     //manipular el estado con base a las acciones
     case "Set Loading":
       return { ...state, loading: action.payload };
+      
     case "Set Saved":
       return {
         ...state,
@@ -135,60 +140,53 @@ const EditUserProvider:FC<Props> = ({ children }) => {
       console.error('User or user id is undefined');
       return;
     }
-
-    const savingsRepository = new UserRepositoryImp(
-      new UserDatasourceImp
-    )
-    // envir los datos al backend
-    dispatch({
-      type: 'Set Saved',
-      payload: true,
+  
+    const userRepository = new UserRepositoryImp(
+      new UserDatasourceImp);
+  
+    dispatch({ 
+      type: 'Set Saved', 
+      payload: true 
     });
-
-    console.log(state.user)
-    //si ya me mando, cerrar el modal
-    const result = await savingsRepository.addUser(state.user);
-    console.log(result);
+  
+    try {
+    const result = await userRepository.addUser(state.user);
 
     if (Array.isArray(result.user)) {
-      console.error('Unexpected user data format');
-      return;
-    }
-    
-    if(result.user) {
+      // Manejar el caso si result.user es un array
+      const updatedUser = result.user[0]; // Puedes seleccionar el primer usuario del array
       dispatch({
         type: 'Set Success',
         payload: {
           success: true,
-          user: result.user,
+          user: updatedUser,
           message: result.message,
-        }
+        },
       });
 
-      onSaved(state.user)
-      return;
+      onSaved(updatedUser);
+    } else {
+      // Manejar el caso si result.user no es un array
+      dispatch({
+        type: 'Set Errors',
+        payload: {
+          message: result.message,
+          errors: result.errors || {},
+        },
+      });
     }
-
-    let errors : any = {};
-
-    result.errors?.forEach((item) => {
-      errors[item.field] = item.error;
-    });
-
-    dispatch({
-      type: 'Set Errors',
-      payload: {
-        message: result.message,
-        errors,
-      }
-    });
-
-    onSaved(state.user)
-    
+    } catch (error) {
+      console.error('Error updating user:', error);
+      dispatch({
+        type: 'Set Errors',
+        payload: {
+          message: 'An error occurred while updating the user.',
+          errors: {},
+        },
+      });
+    }
   }
-
-    
-
+  
   function setUser(user: User){
 
     dispatch({

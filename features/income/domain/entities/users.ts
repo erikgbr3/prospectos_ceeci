@@ -5,33 +5,45 @@ class User {
     
     id?: number;
     name: string;
-    lastName: string;
+    lastname: string;
+    secondLastname: string;
     phone: string;
     email: string;
     address: string;
-    status?: Status;
-    area?: Area;
+    status: number;
+    area: number;
+    observations: string;
+    statusName?: Status | undefined;
+    areaName?: Area | undefined;
 
     constructor(
         
         name: string,
-        lastName: string,
+        lastname: string,
+        secondLastname: string,
         phone: string,
         email: string,
         address: string,
-        status?: Status,
-        area?: Area,
+        status: number,
+        area: number,
+        observations: string,
+        statusName?: Status | undefined,
+        areaName?: Area | undefined,
         id?: number,
 
     ) {
         this.id = id;
         this.name = name;
-        this.lastName = lastName;
+        this.lastname = lastname;
+        this.secondLastname = secondLastname;
         this.phone = phone;
         this.email = email;
         this.address = address;
         this.status = status;
-        this.area = area;
+        this.area = area,
+        this.observations = observations;
+        this.statusName = statusName;
+        this.areaName = areaName;
         
     }
 }

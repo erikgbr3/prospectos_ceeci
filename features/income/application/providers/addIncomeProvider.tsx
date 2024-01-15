@@ -10,8 +10,10 @@ interface ContextDefinition {
   //definición del estado
   loading: boolean;
   saved: boolean, 
+  success: boolean,
   message?: string,
   user: User,
+  errors: any,
   
   // acciones que tendrá mi context
   setUserProp: (property: string, value: any) => void,
@@ -25,20 +27,35 @@ interface AddUserState {
   //definición del estado
   loading: boolean;
   saved: boolean,
+  success: boolean,
   message?: string,
   user: User,
+  errors: any,
 }
 
 //definir los tipos de acciones que podra ejecutar el context / providers
 type AddUserActionType =
   | { type: "Set Loading"; payload: boolean }
   | { type: "Set Saved"; payload: boolean }
-  | { type: "Set User"; payload: User };
+  | {
+    type: 'set Success', payload: {
+      success: boolean,
+      user?: User,
+      message: string
+    }
+  }
+  | { type: "Set User"; payload: User }
+  | { type: 'Set Message', payload: string | null}
+  | { type: 'Set Errors', payload: {
+    message: string,
+    errors: any
+  }};
 
 //inicializar el state
 const initialState: AddUserState = {
   loading: false,
   saved: false,
+  success: false,
   message: undefined,
   user: new User(
     '',
@@ -46,10 +63,15 @@ const initialState: AddUserState = {
     '',
     '',
     '',
+    '',
+    0,
+    0,
+    '',
     new Status(''),
     new Area('', ''),
     undefined,
     ),
+    errors: {},
 };
 
 function AddUserReducer(
@@ -102,13 +124,28 @@ const AddUserProvider:FC<Props> = ({ children }) => {
       type: 'Set Saved',
       payload: true,
     });
+
     
-    const savedUser = await savingsRepository.addUser(state.user);
-    console.log(savedUser);
-    dispatch({
-      type: 'Set Saved',
-      payload: false,
-    });
+    
+    const result = await savingsRepository.addUser(state.user);
+    if (result.user) {
+      dispatch({
+        type: 'set Success',
+        payload: {
+          success: true,
+          message: result.message,
+        }
+      })
+    } else {
+      // Manejar el caso si result.user no es un array
+      dispatch({
+        type: 'Set Errors',
+        payload: {
+          message: result.message,
+          errors: result.errors || {},
+        },
+      });
+    }
   }
 
   return (

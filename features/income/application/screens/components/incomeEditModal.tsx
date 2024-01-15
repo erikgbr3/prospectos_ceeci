@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -13,7 +13,6 @@ import AreaResult from '../../../domain/entities/areaResult';
 import BackendConfig from '../../../../../config/backend/config';
 
 interface UserEditViewProps {
-
     userEdit: User,
     onSaved: Function,
     isVisible: boolean;
@@ -30,7 +29,10 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     const { 
         loading,
         saved, 
-        user, 
+        success,
+        message,
+        user,
+        errors,
 
         setUserProp, 
         saveUser,
@@ -42,12 +44,17 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
 
     const [area, setArea] = useState<Area[]>([]);
 
+    const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
+    const [selectedArea, setSelectedArea] = useState<Area | null>(null);
+
     //al recibir el usuario a editar, pasarlo al proveedor de estado
 
     useEffect(() => {
       console.log('User in EditUserModal:', user);
       setUser(userEdit);
   }, [userEdit]);
+
+
 
     useEffect(() => {
       const fetchData = async () => {
@@ -71,7 +78,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
           if (!response) {
             return new StatusResult([]);
           }
-          const status = response.map((item: any) => new Status(item.rolName, item.id));
+          const status = response.map((item: any) => new Status(item.name, item.id));
           return new StatusResult(status);
         });
     };
@@ -92,7 +99,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     }, []);
   
     const getArea = async () => {
-      return fetch(`${BackendConfig.url}/api/area`)
+      return fetch(`${BackendConfig.url}/api/courses`)
         .then((response) => response.json())
         .then((response) => {
           if (!response) {
@@ -102,13 +109,51 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
           return new AreaResult(area);
         });
     };
-  
+
+    const handleSave = async (onSaved: Function) => {
+      try {
+        await saveUser(onSaved);
+        //updateSaving(); // Actualizar la lista de categorías
+        closeModal();
+
+        if (onSaved) {
+          onSaved();
+        }
     
+        // Cierra el modal
+        closeModal();
+      } catch (error: any) {
+        console.error("Error al guardar la categoría:", error);
+        console.log("Respuesta del servidor:", error.response);
+    
+        if (typeof error.response === 'string') {
+          console.log("Respuesta del servidor (no JSON):", error.response);
+        } else {
+          throw error;
+        }
+      }
+    };
+
+    useEffect(() => {
+      if (success) {
+        Alert.alert('Registro Exitoso', message);
+        setModalVisible(false);
+      } else if (message) {
+        Alert.alert('Error', message);
+      }
+    }, [success, message]);
+  
     return (
-      <Modal isVisible={isVisible}>
+      <Modal 
+      animationIn='bounceInUp'
+      animationOut='bounceOutDown'
+      animationInTiming={500}
+      animationOutTiming={500}
+      isVisible={isVisible}
+    >
       <ScrollView>
-      <View style={styles.modalContainer}>
-        <Text style={styles.info}>Registrar Prospecto</Text>
+        <View style={styles.modalContainer}>
+          <Text style={styles.info}>Registrar Prospecto</Text>
         <View>
         <Text style={styles.info2}>Nombre</Text>
         <View style={styles.inputView}>
@@ -125,23 +170,38 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
           </View>
 
         <View>
-          <Text style={styles.info2}>Apellido</Text>
+          <Text style={styles.info2}>A. Paterno</Text>
         <View style={styles.inputView}>
           <TextInput style={styles.inputText}
               placeholder="Escribe el Apellido"
               placeholderTextColor="#808080"
-              value={user?.lastName || ''}
+              value={user?.lastname || ''}
               onChangeText={(text) => {
-                setUserProp('lastName', text);
+                setUserProp('lastname', text);
               }}
               textContentType="name"
             />
-          </View>
-          </View>
+        </View>
+        </View>
+
+        <View>
+          <Text style={styles.info2}>A. Materno</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe el Apellido"
+              placeholderTextColor="#808080"
+              value={user?.secondLastname || ''}
+              onChangeText={(text) => {
+                setUserProp('secondLastname', text);
+              }}
+              textContentType="name"
+            />
+        </View>
+        </View>
 
           <View>
-          <Text style={styles.info2}>Teléfono</Text>
-        <View style={styles.inputView}>
+            <Text style={styles.info2}>Teléfono</Text>
+          <View style={styles.inputView}>
           <TextInput style={styles.inputText}
               placeholder="Escribe el Teléfono"
               placeholderTextColor="#808080"
@@ -155,8 +215,8 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
           </View>
 
           <View>
-          <Text style={styles.info2}>Correo</Text>
-        <View style={styles.inputView}>
+            <Text style={styles.info2}>Correo</Text>
+          <View style={styles.inputView}>
           <TextInput style={styles.inputText}
               placeholder="Escribe el Correo"
               placeholderTextColor="#808080"
@@ -170,8 +230,8 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
           </View>
 
           <View>
-          <Text style={styles.info2}>Dirección</Text>
-        <View style={styles.inputView}>
+            <Text style={styles.info2}>Dirección</Text>
+          <View style={styles.inputView}>
           <TextInput style={styles.inputText}
               placeholder="Escribe la Direccion"
               placeholderTextColor="#808080"
@@ -185,66 +245,83 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
           </View>
 
           <View>
+            <Text style={styles.info2}>Observaciones</Text>
+          <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe alguna observación"
+              placeholderTextColor="#808080"
+              value={user?.observations || ''}
+              onChangeText={(text) => {
+                setUserProp('observations', text);
+              }}
+              textContentType="none"
+            />
+          </View>
+          </View>
+
+          <View>
           <Text style={styles.info2}>Selecciona Status</Text>
           <View>
           <SelectDropdown
-            data={status}
-            onSelect={(selectedItem, index) => {
-              if(selectedItem){
-                setUserProp('status', selectedItem.id);
-                console.log(selectedItem.id);
-              } else {
-                console.log("alerta de error");  
-              }
-            }}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              return selectedItem.rolName;
-            }}
-            rowTextForSelection={(item, index) => {
-              return item.rolName;
-            }}
-          />
-        </View>
-        </View>
+                data={status}
+                defaultButtonText={user?.statusName?.name}
+                onSelect={(selectedItem, index) => {
+                  setSelectedStatus(selectedItem);
+                  if (selectedItem) {
+                    setUserProp('status',selectedItem.id);
+                  } else {
+                    console.log("alerta de error");  
+                  }
+                }}
+                buttonTextAfterSelection={(selectedItem, index) => {
+                  return selectedItem ? selectedItem.name : 'Selecciona Status';
+                }}
+                rowTextForSelection={(item, index) => {
+                  return item.name;
+                }}
+              />
+              </View>
+              </View>
 
-        <View>
-          <Text style={styles.info2}>Selecciona  Área</Text>
-          <View>
-          <View>
-          <SelectDropdown
-            data={area}
-            onSelect={(selectedItem, index) => {
-              if(selectedItem){
-                setUserProp('area', selectedItem.id)
-                console.log(selectedItem.id);
-              } else {
-                console.log("alerta de error");  
-              }
-            }}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              return selectedItem.name;
-            }}
-            rowTextForSelection={(item, index) => {
-              return item.name;
-            }}
-          />
-        </View>
-        </View>
-        </View>
+              <View>
+                <Text style={styles.info2}>Selecciona  Área</Text>
+                <View>
+                <View>
+                <SelectDropdown
+                      data={area}
+                      defaultButtonText={user?.areaName?.name}
+                      onSelect={(selectedItem, index) => {
+                        setSelectedArea(selectedItem);
+                        if (selectedItem) {
+                          setUserProp('area',selectedItem.id);
+                        } else {
+                          console.log("alerta de error");  
+                        }
+                      }}
+                      buttonTextAfterSelection={(selectedItem, index) => {
+                        return selectedItem ? selectedItem.name : 'Selecciona Área';
+                      }}
+                      rowTextForSelection={(item, index) => {
+                        return item.name;
+                      }}
+                    />
+              </View>
+              </View>
+              </View>
 
-            <View style={styles.buttonContainer}>
-            
-            <TouchableOpacity onPress={() => saveUser(onSaved)}>
-              <Button style={styles.button} buttonColor='#f45572' >
-                <Icon name="check" size={20} color="white" /> 
-              </Button>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => closeModal(null)}> 
-                <Button style={styles.button} buttonColor='#6a9eda'>
-                    <Icon name="close" size={20} color="white" /> 
+              <View style={styles.buttonContainer}>
+              
+              <TouchableOpacity onPress={() => handleSave(onSaved)}>
+                <Button style={styles.button} buttonColor='#f45572' >
+                  <Icon name="check" size={20} color="white" /> 
                 </Button>
-            </TouchableOpacity>
-            </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => closeModal()}> 
+                  <Button style={styles.button} buttonColor='#6a9eda'>
+                      <Icon name="close" size={20} color="white" /> 
+                  </Button>
+              </TouchableOpacity>
+              </View>
         </View>
         </ScrollView>
         </Modal>
@@ -317,3 +394,7 @@ inputText: {
 
 
 export default EditSavingScreen;
+function setModalVisible(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+

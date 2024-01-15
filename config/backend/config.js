@@ -1,5 +1,5 @@
 const BackendConfig = {
-  url: 'http://10.147.181.123:3000',
+  url: 'https://ceeci-prospecto-web.vercel.app',
 }
 
 export default BackendConfig;

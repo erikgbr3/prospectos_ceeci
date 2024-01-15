@@ -1,17 +1,17 @@
 class Status {
     
     id?: number;
-    rolName: string;
+    name: string;
     
 
     constructor(
         
-        rolName: string,
+        name: string,
         id?: number,
 
     ) {
         this.id = id;
-        this.rolName = rolName;
+        this.name = name;
         
     }
 }

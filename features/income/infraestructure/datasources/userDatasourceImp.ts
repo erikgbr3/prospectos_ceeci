@@ -24,7 +24,7 @@ class UserDatasourceImp extends UserDatasource {
                 return new SavingsResult([]);
             }
     
-            const savings = jsonResponse.map((item: any) => new Saving(item.rolName, item.id));
+            const savings = jsonResponse.map((item: any) => new Saving(item.rolname, item.id));
     
             return new SavingsResult(savings);
         } catch (error) {
@@ -37,7 +37,7 @@ class UserDatasourceImp extends UserDatasource {
     async addUser(user: User): Promise<AddUsersResult> {
         console.log(user);
 
-    return fetch(`${BackendConfig.url}/api/user`, {
+    return fetch(`${BackendConfig.url}/api/users?id=${user.id}`, {
       method: !user.id? "POST" : "PUT",
       body: JSON.stringify(user), // data can be `string` or {object}!
       headers: {
@@ -56,7 +56,7 @@ class UserDatasourceImp extends UserDatasource {
     }
 
     async deleteUser(user: User): Promise<AddUsersResult> {
-        return fetch(`${BackendConfig.url}/api/user?id=${user.id}`, {
+        return fetch(`${BackendConfig.url}/api/users?id=${user.id}`, {
             method: 'DELETE',
             headers: {
               'Contend-type': "application/json",
@@ -74,7 +74,7 @@ class UserDatasourceImp extends UserDatasource {
 
     async getUsers(): Promise<UsersResult> {
         try {
-            const response = await fetch(`${BackendConfig.url}/api/user`);
+            const response = await fetch(`${BackendConfig.url}/api/users`);
             const responseData = await response.json();
     
             if (!responseData) {
@@ -83,18 +83,19 @@ class UserDatasourceImp extends UserDatasource {
     
             const users = responseData.map((item: any) => {
                 const user = new User(
-                    item.name,
-                    item.lastName,
-                    item.phone,
-                    item.email,
-                    item.address,
-                    item.status,
-                    item.area,
+                    item.name || '',
+                    item.lastname || '',
+                    item.secondLastname || '',
+                    item.phone || '',
+                    item.email || '',
+                    item.address || '',
+                    item.status || '',
+                    item.area || '',
+                    item.observations || '',
+                    new Status(item.userStatus?.name || null, item.statusName || null),
+                    new Area(item.course?.name || null, item.course?.area || null, item.areaName || null),
                     item.id
                 );
-    
-                user.status = new Status(item.statusId.rolName, item.statusId.id);
-                user.area = new Area(item.courses.name, item.courses.area, item.courses.id);
     
                 return user;
             });
@@ -105,40 +106,10 @@ class UserDatasourceImp extends UserDatasource {
             return new UsersResult([]);
         }
     }
-    
-
-/*     async getUsers(): Promise<UsersResult> {
-
-        return fetch(`${BackendConfig.url}/api/user`)
-        .then((response) => response.json())
-        .then((response) => {
-
-            console.log(response);
-
-            if (!response) {
-                return new UsersResult(
-                    []
-                )
-            }
-            const user = response.map((item : any) => new User(
-                item.name,
-                item.lastName,
-                item.phone,
-                item.email,
-                item.address,
-                item.status,
-                item.area,
-                item.id,
-                )
-            );
-
-            return new UsersResult(user)
-        });
-    } */
 
     async getArea(): Promise<AreaResult> {
         try {
-            const response = await fetch(`${BackendConfig.url}/api/area`);
+            const response = await fetch(`${BackendConfig.url}/api/courses`);
             const jsonResponse = await response.json();
     
             console.log(jsonResponse);
@@ -147,7 +118,7 @@ class UserDatasourceImp extends UserDatasource {
                 return new CategorysResult([]);
             }
     
-            const savings = jsonResponse.map((item: any) => new Saving(item.rolName, item.id));
+            const savings = jsonResponse.map((item: any) => new Saving(item.name, item.id));
     
             return new CategorysResult(savings);
         } catch (error) {

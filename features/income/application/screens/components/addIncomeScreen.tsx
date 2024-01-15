@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FC } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import {AddUserProvider, useAddUserState } from '../../providers/addIncomeProvider';
 import Modal from 'react-native-modal';
 import { Button } from 'react-native-paper';
@@ -20,7 +20,14 @@ interface AddUserModalProps {
 
 const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
 
-  const { loading, user, setUserProp, saveUser} = useAddUserState();
+  const { 
+    loading, 
+    success,
+    message,
+    user, 
+    errors,
+    setUserProp, 
+    saveUser} = useAddUserState();
 
   const [status, setStatus] = useState<Status[]>([]);
   const [area, setArea] = useState<Area[]>([]);
@@ -49,7 +56,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
         if (!response) {
           return new StatusResult([]);
         }
-        const status = response.map((item: any) => new Status(item.rolName, item.id));
+        const status = response.map((item: any) => new Status(item.name, item.id));
         return new StatusResult(status);
       });
   };
@@ -70,7 +77,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
   }, []);
 
   const getArea = async () => {
-    return fetch(`${BackendConfig.url}/api/area`)
+    return fetch(`${BackendConfig.url}/api/courses`)
       .then((response) => response.json())
       .then((response) => {
         if (!response) {
@@ -100,8 +107,23 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
     }
   };
 
+  useEffect(() => {
+    if (success) {
+      Alert.alert('Registro Exitoso', message);
+      setModalVisble(false);
+    } else if (message) {
+      Alert.alert('Error', message);
+    }
+  }, [success, message]);
+
   return (
-    <Modal isVisible={isVisible}>
+    <Modal 
+      animationIn='bounceInUp'
+      animationOut='bounceOutDown'
+      animationInTiming={500}
+      animationOutTiming={500}
+      isVisible={isVisible}
+    >
       <ScrollView>
       <View style={styles.modalContainer}>
         <Text style={styles.info}>Registrar Prospecto</Text>
@@ -121,14 +143,29 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
           </View>
 
         <View>
-          <Text style={styles.info2}>Apellido</Text>
+          <Text style={styles.info2}>A. Paterno</Text>
         <View style={styles.inputView}>
           <TextInput style={styles.inputText}
               placeholder="Escribe el Apellido"
               placeholderTextColor="#808080"
-              value={user?.lastName || ''}
+              value={user?.lastname || ''}
               onChangeText={(text) => {
-                setUserProp('lastName', text);
+                setUserProp('lastname', text);
+              }}
+              textContentType="name"
+            />
+          </View>
+          </View>
+
+          <View>
+          <Text style={styles.info2}>A. Materno</Text>
+        <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe el Apellido"
+              placeholderTextColor="#808080"
+              value={user?.secondLastname || ''}
+              onChangeText={(text) => {
+                setUserProp('secondLastname', text);
               }}
               textContentType="name"
             />
@@ -167,7 +204,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
 
           <View>
           <Text style={styles.info2}>Dirección</Text>
-        <View style={styles.inputView}>
+          <View style={styles.inputView}>
           <TextInput style={styles.inputText}
               placeholder="Escribe la Direccion"
               placeholderTextColor="#808080"
@@ -176,6 +213,21 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
                 setUserProp('address', text);
               }}
               textContentType="addressCityAndState"
+            />
+          </View>
+          </View>
+
+          <View>
+          <Text style={styles.info2}>Observaciones</Text>
+          <View style={styles.inputView}>
+          <TextInput style={styles.inputText}
+              placeholder="Escribe alguna observación"
+              placeholderTextColor="#808080"
+              value={user?.observations || ''}
+              onChangeText={(text) => {
+                setUserProp('observations', text);
+              }}
+              textContentType="none"
             />
           </View>
           </View>
@@ -194,10 +246,10 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               }
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
-              return selectedItem.rolName;
+              return selectedItem.name;
             }}
             rowTextForSelection={(item, index) => {
-              return item.rolName;
+              return item.name;
             }}
           />
         </View>
@@ -214,7 +266,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
                 setUserProp('area', selectedItem.id)
                 console.log(selectedItem.id);
               } else {
-                console.log("alerta de error, panal");  
+                console.log("alerta de error");  
               }
             }}
             buttonTextAfterSelection={(selectedItem, index) => {
@@ -316,3 +368,7 @@ picker: {
 });
 
 export default AddSavingScreen;
+function setModalVisble(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+
