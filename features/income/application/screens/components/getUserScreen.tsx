@@ -17,7 +17,7 @@ type CardProps = {
     onCancelDelete?: Function;
 }
 
-const SavingCard: React.FC<CardProps> = ({
+const UserList: React.FC<CardProps> = ({
     user,
     onEdit,
     onDeleted,
@@ -190,7 +190,7 @@ const SavingCard: React.FC<CardProps> = ({
     );
 }
 
-export default SavingCard;
+export default UserList;
 
 
 const styles = StyleSheet.create({

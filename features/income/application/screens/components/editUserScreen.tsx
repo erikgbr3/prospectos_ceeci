@@ -2,7 +2,7 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Alert 
 import Modal from 'react-native-modal';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {EditUserProvider, useEditUserState } from '../../providers/editIncomeProvider';
+import {EditUserProvider, useEditUserState } from '../../providers/editUserProvider';
 import React, { useEffect, useState} from 'react';
 import SelectDropdown from 'react-native-select-dropdown';
 import User from '../../../domain/entities/users';
@@ -331,7 +331,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     );
     };
 
-    const EditSavingScreen = (props: any) => (
+    const EditUserScreen = (props: any) => (
       <EditUserProvider>
           <EditUserModal {...props} />
       </EditUserProvider>
@@ -419,5 +419,5 @@ inputTextArea: {
 });
 
 
-export default EditSavingScreen;
+export default EditUserScreen;
 

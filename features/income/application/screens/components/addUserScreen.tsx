@@ -1,10 +1,9 @@
 import React, { useState, useEffect, FC } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
-import {AddUserProvider, useAddUserState } from '../../providers/addIncomeProvider';
+import {AddUserProvider, useAddUserState } from '../../providers/addUserProvider';
 import Modal from 'react-native-modal';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
-import backendConfig from '../../../../../config/backend/config';
 import SelectDropdown from 'react-native-select-dropdown';
 import StatusResult from '../../../domain/entities/statusResult';
 import Status from '../../../domain/entities/status';
@@ -340,7 +339,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
   );
 };
 
-const AddSavingScreen = (props: any) => (
+const AddUserScreen = (props: any) => (
   <AddUserProvider>
     <AddUserModal {...props} />
   </AddUserProvider>
@@ -426,5 +425,5 @@ inputTextArea: {
 },
 });
 
-export default AddSavingScreen;
+export default AddUserScreen;
 

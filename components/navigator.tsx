@@ -4,7 +4,7 @@ import { AntDesign } from '@expo/vector-icons';
 
 import SavingsScreen from "../features/savings/application/screens/savingsScreen"; 
 import CategorysScreen from "../features/category/application/screens/categorysScreen";
-import IncomesScreen from "../features/income/application/screens/incomesScreen";
+import IncomesScreen from "../features/income/application/screens/userScreen";
 
 const Tab = createBottomTabNavigator();
 

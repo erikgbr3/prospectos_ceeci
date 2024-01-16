@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
-import SavingCard from './components/incomesCard';
-import { UsersProvider, useUsersState } from '../providers/IncomesProvider'; 
+import SavingCard from './components/getUserScreen';
+import { UsersProvider, useUsersState } from '../providers/getUserProvider'; 
 import { Button, TextInput } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import AddSavingScreen from './components/addIncomeScreen';
-import EditSavingScreen from './components/incomeEditModal';
+import AddSavingScreen from './components/addUserScreen';
+import EditSavingScreen from './components/editUserScreen';
 import UserDeleteScreen from './components/deleteUserScreen';
 import User from '../../domain/entities/users';
 import { useDeleteUserState } from '../providers/deleteUserProvider';
+import UserList from './components/getUserScreen';
+import AddUserScreen from './components/addUserScreen';
+import EditUserScreen from './components/editUserScreen';
 
-const SavingsScreenView = () => {
+const UsersScreenView = () => {
 
   const { 
     users,
@@ -78,7 +81,7 @@ const SavingsScreenView = () => {
         data={filteredUsers}
         keyExtractor={(item) => `user${item.id}`}
         renderItem={({ item }) => (
-          <SavingCard
+          <UserList
             user={item}
             onEdit={setUserSelected}
             onDeleted={(user: User) => setUserSelectedDeleted(user)}
@@ -132,7 +135,7 @@ const SavingsScreenView = () => {
       {renderCards()}
       </View>
       
-      <AddSavingScreen 
+      <AddUserScreen
       isVisible={isModalVisible} 
       closeModal={() => {
         toggleModal();
@@ -142,7 +145,7 @@ const SavingsScreenView = () => {
       />
 
       {!!userSelected ? (
-        <EditSavingScreen
+        <EditUserScreen
         userEdit={userSelected}
         isVisible={!!userSelected}
         onSaved={() => {
@@ -169,9 +172,9 @@ const SavingsScreenView = () => {
   );
 }
 
-const IncomesScreen = (props: any) => (
+const UsersScreen = (props: any) => (
   <UsersProvider>
-    <SavingsScreenView {...props} /> 
+    <UsersScreenView {...props} /> 
   </UsersProvider>
 )
 
@@ -220,4 +223,4 @@ buttonContainer: {
 
 });
 
-export default IncomesScreen;
+export default UsersScreen;

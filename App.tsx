@@ -1,11 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import IncomesScreen from './features/income/application/screens/incomesScreen';
+import UsersScreen from './features/income/application/screens/userScreen';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <IncomesScreen/>
+      <UsersScreen/>
       <StatusBar style="auto" />
     </View>
   );
