@@ -4,7 +4,6 @@ import StatusResult from "../entities/statusResult";
 import User from "../entities/users";
 import UsersResult from "../entities/usersResult";
 
-
 abstract class UserDatasource {   
     // tendra una funcion para leer las categorias por numero de pagina, y retonarlos
     abstract getStatus() : Promise<StatusResult>;

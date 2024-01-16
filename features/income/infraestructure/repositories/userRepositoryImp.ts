@@ -1,4 +1,4 @@
-import SavingsDatasource from "../../domain/datasourses/userDatasource";
+import UserDatasource from "../../domain/datasourses/userDatasource";
 import AddUsersResult from "../../domain/entities/addUserResult";
 import AreaResult from "../../domain/entities/areaResult";
 import StatusResult from "../../domain/entities/statusResult";
@@ -8,9 +8,9 @@ import UserRepository from "../../domain/repositorio/userRepository";
 
 class UserRepositoryImp extends UserRepository {
    
-    datasource: SavingsDatasource;
+    datasource: UserDatasource;
 
-    constructor(datasource: SavingsDatasource) {
+    constructor(datasource: UserDatasource) {
         super();
         this.datasource = datasource;
     }

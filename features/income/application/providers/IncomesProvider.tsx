@@ -10,12 +10,15 @@ import UserDatasourceImp from "../../infraestructure/datasources/userDatasourceI
 interface ContextDefinition{
 
     loading:  boolean,
-    users: User[];
-    userSelected: User | null;
+    users: User[],
+    userSelected: User | null,
+    userSelectedDeleted: User | null,
 
-    getUsers:()=>void;
-    setUserSelected:(user: User | null) => void;
-    onUpdateUser: (user: User) => void;
+    getUsers:()=>void,
+    setUserSelected:(user: User | null) => void,
+    setUserSelectedDeleted: (user: User | null) => void,
+    onUpdateUser: (user: User) => void,
+    onDeleteUser: (user: User) => void,
 }
 
 const userContext = createContext ( {} as ContextDefinition);
@@ -24,7 +27,9 @@ const userContext = createContext ( {} as ContextDefinition);
 interface UsersState {
     loading:  boolean,
     users: User[],
-    userSelected: User | null;
+    userSelected: User | null,
+    userSelectedDeleted: User | null,
+ 
 }
 
 //definir los tipos de acciones que podra ejecutar el context
@@ -33,6 +38,7 @@ type UsersActionType =
     |  { type: 'Set Loading', payload: boolean}
     |  {type: 'Set Data', payload: UsersResult}
     |  {type: 'Set User Selected', payload:  User | null}
+    | { type: 'Set User Selected Deleted', payload: User | null}
     // |  {type: 'Set Category Selected', payload: Category | null } //parte para editar
     
 //iniciar el state
@@ -42,6 +48,8 @@ const InitialState : UsersState = {
     loading:  false,
     users: [],
     userSelected: null,
+    userSelectedDeleted: null,
+
 }
 
 function userReducer(
@@ -56,7 +64,7 @@ function userReducer(
             case 'Set Data':
                 return {
                     ...state,
-                    users:action.payload.user,
+                    users:action.payload.users,
                     loading: false
                 };
             case 'Set User Selected':
@@ -64,7 +72,14 @@ function userReducer(
                     ...state,
                     userSelected:action.payload,
                 };
-                default:
+
+            case 'Set User Selected Deleted':
+                return {
+                    ...state,
+                    matchSelectedDeleted: action.payload
+                }
+
+            default:
                     return state;
     }
 }
@@ -108,9 +123,16 @@ const UsersProvider:FC<Props> = ({ children }) => {
         });
     }
 
+    function setUserSelectedDeleted(user: User | null) {
+        console.log("Usuario a eliminar", user);
+        dispatch({
+            type: 'Set User Selected Deleted',
+            payload: user
+        })
+    }
+
+
     function onUpdateUser(user: User) {
-        //buscar el registro en category y reemplazarlo
-        //actualizar el estado category
         console.log(user)
         const usersClone = [...state.users];
         const index = usersClone.findIndex((item)=> item.id == user.id);
@@ -119,7 +141,7 @@ const UsersProvider:FC<Props> = ({ children }) => {
         dispatch({
             type: 'Set Data',
             payload: {
-                user: usersClone,
+                users: usersClone,
             }
         }
         )
@@ -127,12 +149,28 @@ const UsersProvider:FC<Props> = ({ children }) => {
         setUserSelected(null);
     }
 
+    function onDeleteUser(user: User) {
+        console.log("Deleting user:", user);
+        const usersClone = state.users.filter(item => item.id !== user.id);
+    
+        dispatch({
+            type: 'Set Data',
+            payload: {
+                users: usersClone,
+            }
+        });
+    
+        setUserSelectedDeleted(null);
+    }
+
     return(
         <userContext.Provider value ={{
             ...state,
             getUsers,
             setUserSelected,
+            setUserSelectedDeleted,
             onUpdateUser,
+            onDeleteUser,
         }}>
         {children}
         </userContext.Provider>

@@ -34,6 +34,18 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
 
   const [selectedUser, setSelectedUser] = useState(null);
 
+  const resetForm = () => {
+    setUserProp('name', '');
+    setUserProp('lastname', '');
+    setUserProp('secondLastname', '');
+    setUserProp('phone', '');
+    setUserProp('email', '');
+    setUserProp('address', '');
+    setUserProp('observations', '');
+    setUserProp('status', 0);
+    setUserProp('area', 0);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -92,7 +104,7 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
   const handleSaveUser = async () => {
     try {
     await saveUser();
-    //updateSaving(); // Actualizar la lista de categorías
+    resetForm(); 
     closeModal();
     
     } catch (error: any) {
@@ -110,10 +122,15 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
   useEffect(() => {
     if (success) {
       Alert.alert('Registro Exitoso', message);
-      setModalVisble(false);
+      resetForm();
+      closeModal();
     } else if (message) {
-      Alert.alert('Error', message);
+      Alert.alert('Registro Exitoso', message);
     }
+
+    return () => {
+      setUserProp('errors', {});
+    };
   }, [success, message]);
 
   return (
@@ -133,12 +150,14 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
           <TextInput style={styles.inputText}
               placeholder="Escribe el Nombre"
               placeholderTextColor="#808080"
-              value={user?.name || ''}
               onChangeText={(text) => {
                 setUserProp('name', text);
               }}
               textContentType="name"
             />
+            {errors?.name ? (
+                      <Text style={{ fontSize: 10, color: 'red' }}>{errors.name}</Text>
+            ) : null}
           </View>
           </View>
 
@@ -148,12 +167,14 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
           <TextInput style={styles.inputText}
               placeholder="Escribe el Apellido"
               placeholderTextColor="#808080"
-              value={user?.lastname || ''}
               onChangeText={(text) => {
                 setUserProp('lastname', text);
               }}
               textContentType="name"
             />
+            {errors?.lastname ? (
+                      <Text style={{ fontSize: 10, color: 'red' }}>{errors.lastname}</Text>
+            ) : null}
           </View>
           </View>
 
@@ -163,12 +184,14 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
           <TextInput style={styles.inputText}
               placeholder="Escribe el Apellido"
               placeholderTextColor="#808080"
-              value={user?.secondLastname || ''}
               onChangeText={(text) => {
                 setUserProp('secondLastname', text);
               }}
               textContentType="name"
             />
+            {errors?.secondLastname ? (
+                      <Text style={{ fontSize: 10, color: 'red' }}>{errors.secondLastname}</Text>
+            ) : null}
           </View>
           </View>
 
@@ -178,12 +201,14 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
           <TextInput style={styles.inputText}
               placeholder="Escribe el Teléfono"
               placeholderTextColor="#808080"
-              value={user?.phone || ''}
               onChangeText={(text) => {
                 setUserProp('phone', text);
               }}
               textContentType="telephoneNumber"
             />
+            {errors?.phone ? (
+                      <Text style={{ fontSize: 10, color: 'red' }}>{errors.phone}</Text>
+            ) : null}
           </View>
           </View>
 
@@ -193,12 +218,14 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
           <TextInput style={styles.inputText}
               placeholder="Escribe el Correo"
               placeholderTextColor="#808080"
-              value={user?.email || ''}
               onChangeText={(text) => {
                 setUserProp('email', text);
               }}
               textContentType="emailAddress"
             />
+            {errors?.email ? (
+                      <Text style={{ fontSize: 10, color: 'red' }}>{errors.email}</Text>
+            ) : null}
           </View>
           </View>
 
@@ -208,35 +235,43 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
           <TextInput style={styles.inputText}
               placeholder="Escribe la Direccion"
               placeholderTextColor="#808080"
-              value={user?.address || ''}
               onChangeText={(text) => {
                 setUserProp('address', text);
               }}
               textContentType="addressCityAndState"
             />
+            {errors?.address ? (
+                      <Text style={{ fontSize: 10, color: 'red' }}>{errors.address}</Text>
+            ) : null}
           </View>
           </View>
 
           <View>
           <Text style={styles.info2}>Observaciones</Text>
-          <View style={styles.inputView}>
-          <TextInput style={styles.inputText}
+          <View style={styles.inputViewArea}>
+          <TextInput 
+              style={styles.inputTextArea}
+              multiline={true}
+              numberOfLines={10}
               placeholder="Escribe alguna observación"
               placeholderTextColor="#808080"
-              value={user?.observations || ''}
               onChangeText={(text) => {
                 setUserProp('observations', text);
               }}
               textContentType="none"
             />
+            {errors?.observations ? (
+                      <Text style={{ fontSize: 10, color: 'red' }}>{errors.observations}</Text>
+            ) : null}
           </View>
           </View>
 
           <View>
-          <Text style={styles.info2}>Selecciona Status</Text>
+          <Text style={styles.info2}>Status</Text>
           <View>
           <SelectDropdown
             data={status}
+            defaultButtonText='Selecciona aquí'
             onSelect={(selectedItem, index) => {
               if(selectedItem){
                 setUserProp('status', selectedItem.id)
@@ -252,15 +287,19 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               return item.name;
             }}
           />
+          {errors?.status ? (
+                      <Text style={{ fontSize: 10, color: 'red' }}>{errors.status}</Text>
+            ) : null}
         </View>
         </View>
 
         <View>
-          <Text style={styles.info2}>Selecciona  Área</Text>
+          <Text style={styles.info2}>Área</Text>
           <View>
           <View>
           <SelectDropdown
             data={area}
+            defaultButtonText='Selecciona aquí'
             onSelect={(selectedItem, index) => {
               if(selectedItem){
                 setUserProp('area', selectedItem.id)
@@ -276,6 +315,9 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               return item.name;
             }}
           />
+          {errors?.area ? (
+                      <Text style={{ fontSize: 10, color: 'red' }}>{errors.area}</Text>
+            ) : null}
         </View>
         </View>
         </View>
@@ -307,7 +349,7 @@ const AddSavingScreen = (props: any) => (
 const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: 'white',
-    padding: 20,
+    padding: 10,
     borderRadius: 10,
     alignItems: 'center',
     
@@ -324,34 +366,50 @@ button: {
 },
 info: {
     marginBottom: 2,
-        textAlign: "center",
-        color: 'black',
-        fontSize: 16,
-        padding: 20,
+    textAlign: "center",
+    color: 'black',
+    fontSize: 28,
+    padding: 20,
 },
 info2: {
   marginBottom: 2,
-      textAlign: "center",
-      color: 'black',
-      fontSize: 15,
-      padding: 5,
+  textAlign: "center",
+  color: 'black',
+  fontSize: 20,
+  paddingTop: 10
 },
 inputView: {
   width: "80%",
   marginTop: 10,
-  backgroundColor: "#fff", // Fondo blanco
+  backgroundColor: "#fff",
   borderRadius: 10,
   height: 50,
   justifyContent: "center",
-  padding: 15, // Reducido el relleno
-  shadowColor: "#000", // Sombra
+  padding: 15, 
+  shadowColor: "#000", 
   shadowOffset: {
     width: 0,
     height: 2,
   },
   shadowOpacity: 0.25,
   shadowRadius: 3.84,
-  elevation: 5, // Sombra para plataformas Android
+  elevation: 5, 
+},
+inputViewArea: {
+  width: "80%",
+  marginTop: 10,
+  backgroundColor: "#fff",
+  borderRadius: 10,
+  justifyContent: "center",
+  padding: 15,
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
 },
 inputText: {
   textAlign: 'center',
@@ -360,15 +418,13 @@ inputText: {
   width: 150,
   color: "#333", // Texto oscuro
 },
-picker: {
-  height: 10,
-  width: 80,
-},
 
+inputTextArea: {
+  textAlignVertical: 'top', 
+  height: 150,    
+  fontSize: 16,           
+},
 });
 
 export default AddSavingScreen;
-function setModalVisble(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
 

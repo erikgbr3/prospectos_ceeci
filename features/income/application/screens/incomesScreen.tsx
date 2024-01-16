@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
 import SavingCard from './components/incomesCard';
 import { UsersProvider, useUsersState } from '../providers/IncomesProvider'; 
 import { Button, TextInput } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AddSavingScreen from './components/addIncomeScreen';
 import EditSavingScreen from './components/incomeEditModal';
+import UserDeleteScreen from './components/deleteUserScreen';
+import User from '../../domain/entities/users';
+import { useDeleteUserState } from '../providers/deleteUserProvider';
 
 const SavingsScreenView = () => {
 
@@ -13,16 +16,25 @@ const SavingsScreenView = () => {
     users,
     loading,
     userSelected,
+    userSelectedDeleted,
 
     //actions
     getUsers,
     setUserSelected,
+    setUserSelectedDeleted,
     onUpdateUser,
-   } = useUsersState();
+    onDeleteUser, 
+   } = useUsersState(); 
+
+   const { deleteUser } = useDeleteUserState();
 
   const [isModalVisible, setModalVisible] = useState(false);
 
+  const [forceUpdateKey, setForceUpdateKey] = useState(0);
+
   const [isDataUpdated, setDataUpdated] = useState(false);
+
+  const [, forceUpdate] = useState();
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -30,6 +42,7 @@ const SavingsScreenView = () => {
     console.log('isModalVisible before toggle:', isModalVisible);
     setModalVisible(!isModalVisible);
   };
+
 
   const handleDataUpdate = () => {
     getUsers();
@@ -50,24 +63,30 @@ const SavingsScreenView = () => {
     if (users == null) {
       return null;
     }
-  
+
     const filteredUsers = users.filter((user) => {
       if (!user) {
-        return false; // O cualquier lógica que desees para manejar el caso de user siendo undefined
+        return false;
       }
-    
-      const fullName = `${user.name} ${user.lastname}`;
+
+      const fullName = `${user.name} ${user.lastname} ${user.secondLastname} ${user.address} ${user.statusName?.name} ${user.areaName?.name} ${user.areaName?.area}`;
       return fullName.toLowerCase().includes(searchTerm.toLowerCase());
     });
-  
-    return filteredUsers.map((user) => (
-      <SavingCard
-        key={`user${user.id}`}
-        user={user}
-        onEdit={setUserSelected}
-        searchTerm={searchTerm}
+
+    return (
+      <FlatList
+        data={filteredUsers}
+        keyExtractor={(item) => `user${item.id}`}
+        renderItem={({ item }) => (
+          <SavingCard
+            user={item}
+            onEdit={setUserSelected}
+            onDeleted={(user: User) => setUserSelectedDeleted(user)}
+            searchTerm={searchTerm}
+          />
+        )}
       />
-    ));
+    );
   };
 
   useEffect(() => {
@@ -108,21 +127,18 @@ const SavingsScreenView = () => {
 
       </View>
       
-    <ScrollView>
    
       <View style={styles.container}>
-      
       {renderCards()}
-
-    
       </View>
       
       <AddSavingScreen 
       isVisible={isModalVisible} 
       closeModal={() => {
         toggleModal();
-        setDataUpdated(true); // Establece isDataUpdated a true después de añadir un nuevo usuario
+        handleUpdateUser(); // Establece isDataUpdated a true después de añadir un nuevo usuario
       }}
+      key={forceUpdateKey}
       />
 
       {!!userSelected ? (
@@ -136,8 +152,18 @@ const SavingsScreenView = () => {
         closeModal={setUserSelected}
         />
       ) : null }
-  
-    </ScrollView>
+
+      {!!userSelectedDeleted ? (
+        <UserDeleteScreen
+        userDelete={userSelectedDeleted}
+        isVisible={!!userSelectedDeleted}
+        onDeleted={() => {
+          onDeleteUser(userSelectedDeleted); // Elimina el usuario de la lista
+          handleUpdateUser() // Limpia el usuario seleccionado para eliminar
+        }}
+        closeModal={() => setUserSelectedDeleted(null)} 
+        />
+      ) : null}
     
     </View>
   );
@@ -152,11 +178,11 @@ const IncomesScreen = (props: any) => (
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    marginRight: '2%',
-    marginLeft: '5%'
-  },
+    flex: 1,
+    alignItems: 'flex-start',  // Alinea las tarjetas a la izquierda
+    justifyContent: 'flex-start', // Ajusta según tus necesidades
+    paddingHorizontal: 10, // Espacio en blanco a cada lado
+},
   title: {
     fontSize: 30,
     textAlign: 'center',
@@ -169,13 +195,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     margin: 10,
     paddingLeft: 10,
-    marginTop: 10,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    marginTop: 10,
-    marginBottom: 10,
-  },
+    marginTop: 5, // Ajusta el margen superior
+},
+buttonContainer: {
+  flexDirection: 'row',
+  marginTop: 10,
+  marginBottom: 10,
+  justifyContent: 'center', // Centra los botones horizontalmente
+},
   button: {
     width: 70,
     height: 70,

@@ -92,6 +92,15 @@ function AddUserReducer(
         ...state,
         user: action.payload,
       }
+
+    case 'Set Errors':
+      return {
+        ...state,
+        errors: action.payload.errors || {},
+        message: action.payload.message,
+        saving: false,
+      }
+
     default:
       return state;
   }
@@ -105,6 +114,14 @@ const AddUserProvider:FC<Props> = ({ children }) => {
   const [state, dispatch] = useReducer(AddUserReducer, initialState);
 
   function setUserProp(property: string, value: any) {
+
+    dispatch({
+      type: 'Set Errors',
+      payload: {
+        message: '',
+        errors: {},
+      },
+    });
     // mandar el valor al estado user
     dispatch({
       type: 'Set User',

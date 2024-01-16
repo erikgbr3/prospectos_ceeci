@@ -136,10 +136,10 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
 
     useEffect(() => {
       if (success) {
-        Alert.alert('Registro Exitoso', message);
-        setModalVisible(false);
+        Alert.alert('Registro Actualizado', message);
+        closeModal();
       } else if (message) {
-        Alert.alert('Error', message);
+        Alert.alert('Registro Actualizado', message);
       }
     }, [success, message]);
   
@@ -153,7 +153,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
     >
       <ScrollView>
         <View style={styles.modalContainer}>
-          <Text style={styles.info}>Registrar Prospecto</Text>
+          <Text style={styles.info}>Editar Prospecto</Text>
         <View>
         <Text style={styles.info2}>Nombre</Text>
         <View style={styles.inputView}>
@@ -246,8 +246,11 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
 
           <View>
             <Text style={styles.info2}>Observaciones</Text>
-          <View style={styles.inputView}>
-          <TextInput style={styles.inputText}
+          <View style={styles.inputViewArea}>
+          <TextInput 
+              style={styles.inputTextArea}
+              multiline={true}
+              numberOfLines={10}
               placeholder="Escribe alguna observación"
               placeholderTextColor="#808080"
               value={user?.observations || ''}
@@ -339,6 +342,7 @@ const styles = StyleSheet.create({
     minHeight: 180,
     backgroundColor: 'white',
     borderRadius: 10,
+    padding: 10,
     alignItems: 'center',
     
 },
@@ -356,15 +360,16 @@ info: {
     marginBottom: 2,
     textAlign: "center",
     color: 'black',
-    fontSize: 16,
+    fontSize: 28,
     marginTop: 25,
 },
 info2: {
     marginBottom: 2,
-        textAlign: "center",
-        color: 'black',
-        fontSize: 15,
-        padding: 5,
+    textAlign: "center",
+    color: 'black',
+    fontSize: 20,
+    paddingTop: 10
+
   },
 inputView: {
   width: "80%",
@@ -381,7 +386,23 @@ inputView: {
   },
   shadowOpacity: 0.25,
   shadowRadius: 3.84,
-  elevation: 5, // Sombra para plataformas Android
+  elevation: 5, 
+},
+inputViewArea: {
+  width: "80%",
+  marginTop: 10,
+  backgroundColor: "#fff",
+  borderRadius: 10,
+  justifyContent: "center",
+  padding: 15,
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
 },
 inputText: {
   textAlign: 'center',
@@ -389,12 +410,14 @@ inputText: {
   height: 50,
   color: "#333", // Texto oscuro
 },
+inputTextArea: {
+  textAlignVertical: 'top', 
+  height: 150,    
+  fontSize: 16,           
+},
 
 });
 
 
 export default EditSavingScreen;
-function setModalVisible(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
 

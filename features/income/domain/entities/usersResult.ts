@@ -2,14 +2,14 @@ import User from "./users";
 
 class UsersResult{
     
-    user: User[];
+    users: User[];
 
     constructor(
 
-        user: User[],
+        users: User[],
     ) {
         
-        this.user = user;
+        this.users = users;
     }
 }
 export default UsersResult;

@@ -103,13 +103,13 @@ function EditSavingReducer(
           saving: false,
         }
 
-        case 'Set Errors':
-          return {
-            ...state,
-            errors: action.payload.errors || {},
-            message: action.payload.message,
-            saving: false,
-          }
+      case 'Set Errors':
+        return {
+          ...state,
+          errors: action.payload.errors || {},
+          message: action.payload.message,
+          saving: false,
+        }
 
     default:
       return state;
