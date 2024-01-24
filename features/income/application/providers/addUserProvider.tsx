@@ -2,8 +2,6 @@ import { FC, ReactNode, createContext, useContext, useReducer } from "react";
 import User from "../../domain/entities/users";
 import UserRepositoryImp from "../../infraestructure/repositories/userRepositoryImp";
 import UserDatasourceImp from "../../infraestructure/datasources/userDatasourceImp";
-import Status from "../../domain/entities/status";
-import Area from "../../domain/entities/area";
 
 //definir la estructura que tendra mi context
 interface ContextDefinition {
@@ -38,7 +36,7 @@ type AddUserActionType =
   | { type: "Set Loading"; payload: boolean }
   | { type: "Set Saved"; payload: boolean }
   | {
-    type: 'set Success', payload: {
+    type: 'Set Success', payload: {
       success: boolean,
       user?: User,
       message: string
@@ -56,7 +54,7 @@ const initialState: AddUserState = {
   loading: false,
   saved: false,
   success: false,
-  message: undefined,
+  message: '',
   user: new User(
     '',
     '',
@@ -67,9 +65,6 @@ const initialState: AddUserState = {
     0,
     0,
     '',
-    new Status(''),
-    new Area('', ''),
-    undefined,
     ),
     errors: {},
 };
@@ -87,6 +82,14 @@ function AddUserReducer(
         ...state,
         saved: action.payload,
       }
+
+    case "Set Success":
+      return {
+        ...state,
+        success: action.payload.success,
+        message: action.payload.message,
+        errors: {},
+      }
     case "Set User":
       return {
         ...state,
@@ -98,7 +101,7 @@ function AddUserReducer(
         ...state,
         errors: action.payload.errors || {},
         message: action.payload.message,
-        saving: false,
+        saved: false,
       }
 
     default:
@@ -114,14 +117,6 @@ const AddUserProvider:FC<Props> = ({ children }) => {
   const [state, dispatch] = useReducer(AddUserReducer, initialState);
 
   function setUserProp(property: string, value: any) {
-
-    dispatch({
-      type: 'Set Errors',
-      payload: {
-        message: '',
-        errors: {},
-      },
-    });
     // mandar el valor al estado user
     dispatch({
       type: 'Set User',
@@ -133,6 +128,8 @@ const AddUserProvider:FC<Props> = ({ children }) => {
   }
 
   async function saveUser() {
+
+    console.log('Saving user:', state.user);
     const savingsRepository = new UserRepositoryImp(
       new UserDatasourceImp
     )
@@ -141,34 +138,41 @@ const AddUserProvider:FC<Props> = ({ children }) => {
       type: 'Set Saved',
       payload: true,
     });
-
-    
     
     const result = await savingsRepository.addUser(state.user);
+
+    console.log('Save user result:', result);
+
     if (result.user) {
       dispatch({
-        type: 'set Success',
+        type: 'Set Success',
         payload: {
           success: true,
+          user: result.user,
           message: result.message,
         }
-      })
-    } else {
-      // Manejar el caso si result.user no es un array
+      });
+        return;
+      }
+
+      let errors : any = {};
+
+      result.errors?.forEach((item) => {
+        errors[item.field] = item.error;
+      });
+
       dispatch({
         type: 'Set Errors',
         payload: {
           message: result.message,
-          errors: result.errors || {},
+          errors,
         },
       });
-    }
   }
 
   return (
     <AddUserContext.Provider value={{
         ...state,
-        //funciones
         setUserProp,
         saveUser,
       }}

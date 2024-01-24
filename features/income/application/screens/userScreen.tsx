@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
-import SavingCard from './components/getUserScreen';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { UsersProvider, useUsersState } from '../providers/getUserProvider'; 
 import { Button, TextInput } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import AddSavingScreen from './components/addUserScreen';
-import EditSavingScreen from './components/editUserScreen';
 import UserDeleteScreen from './components/deleteUserScreen';
 import User from '../../domain/entities/users';
 import { useDeleteUserState } from '../providers/deleteUserProvider';
@@ -29,15 +26,9 @@ const UsersScreenView = () => {
     onDeleteUser, 
    } = useUsersState(); 
 
-   const { deleteUser } = useDeleteUserState();
-
   const [isModalVisible, setModalVisible] = useState(false);
 
-  const [forceUpdateKey, setForceUpdateKey] = useState(0);
-
   const [isDataUpdated, setDataUpdated] = useState(false);
-
-  const [, forceUpdate] = useState();
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -53,16 +44,19 @@ const UsersScreenView = () => {
   };
 
   const handleUpdateUser = () => {
+    console.log('Before setDataUpdated:', isDataUpdated);
     setDataUpdated(true);
+    console.log('After setDataUpdated:', isDataUpdated);
   };
 
   useEffect(() => {
     if (isDataUpdated) {
+      console.log('handleDataUpdate called');
       handleDataUpdate();
     }
   }, [isDataUpdated]);
 
-  const renderCards = () => {
+  const renderList = () => {
     if (users == null) {
       return null;
     }
@@ -84,7 +78,10 @@ const UsersScreenView = () => {
           <UserList
             user={item}
             onEdit={setUserSelected}
-            onDeleted={(user: User) => setUserSelectedDeleted(user)}
+            onDeleted={(user: User) => {
+              setUserSelectedDeleted(user);
+              handleUpdateUser();
+            }}
             searchTerm={searchTerm}
           />
         )}
@@ -94,15 +91,8 @@ const UsersScreenView = () => {
 
   useEffect(() => {
     getUsers();
-  }, []);
+  },[]);
 
-  useEffect(() => {
-    console.log('Users:', users);
-  }, [users]);
-
-  useEffect(() => {
-      console.log('User Selected:', userSelected);
-  }, [userSelected]);
 
     return (
     <View >
@@ -132,24 +122,24 @@ const UsersScreenView = () => {
       
    
       <View style={styles.container}>
-      {renderCards()}
+      {renderList()}
       </View>
-      
+  
       <AddUserScreen
       isVisible={isModalVisible} 
       closeModal={() => {
         toggleModal();
-        handleUpdateUser(); // Establece isDataUpdated a true después de añadir un nuevo usuario
+        handleUpdateUser(); 
       }}
-      key={forceUpdateKey}
       />
+      
 
       {!!userSelected ? (
         <EditUserScreen
         userEdit={userSelected}
         isVisible={!!userSelected}
         onSaved={() => {
-          onUpdateUser(userSelected); // Pasa el usuario actualizado como argumento
+          onUpdateUser(userSelected);
           handleUpdateUser();
         }}
         closeModal={setUserSelected}
@@ -161,8 +151,8 @@ const UsersScreenView = () => {
         userDelete={userSelectedDeleted}
         isVisible={!!userSelectedDeleted}
         onDeleted={() => {
-          onDeleteUser(userSelectedDeleted); // Elimina el usuario de la lista
-          handleUpdateUser() // Limpia el usuario seleccionado para eliminar
+          onDeleteUser(userSelectedDeleted);
+          handleUpdateUser() 
         }}
         closeModal={() => setUserSelectedDeleted(null)} 
         />
@@ -182,9 +172,9 @@ const UsersScreen = (props: any) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'flex-start',  // Alinea las tarjetas a la izquierda
-    justifyContent: 'flex-start', // Ajusta según tus necesidades
-    paddingHorizontal: 10, // Espacio en blanco a cada lado
+    alignItems: 'flex-start', 
+    justifyContent: 'flex-start', 
+    paddingHorizontal: 10, 
 },
   title: {
     fontSize: 30,
@@ -198,13 +188,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     margin: 10,
     paddingLeft: 10,
-    marginTop: 5, // Ajusta el margen superior
+    marginTop: 5,
 },
 buttonContainer: {
   flexDirection: 'row',
   marginTop: 10,
   marginBottom: 10,
-  justifyContent: 'center', // Centra los botones horizontalmente
+  justifyContent: 'center',
 },
   button: {
     width: 70,

@@ -67,9 +67,6 @@ type EditUserActionType =
       0,
       0,
       '',
-      new Status(''),
-      new Area('', ''),
-      undefined,
       ),
     errors: {},
   };
@@ -100,7 +97,7 @@ function EditSavingReducer(
           success: action.payload.success,
           message: action.payload.message,
           errors: {},
-          saving: false,
+          saved: false,
         }
 
       case 'Set Errors':
@@ -108,7 +105,7 @@ function EditSavingReducer(
           ...state,
           errors: action.payload.errors || {},
           message: action.payload.message,
-          saving: false,
+          saved: false,
         }
 
     default:

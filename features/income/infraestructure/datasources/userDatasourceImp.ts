@@ -1,8 +1,6 @@
 import Saving from "../../domain/entities/status";
 import User from "../../domain/entities/users";
-import SavingsResult from "../../domain/entities/statusResult";
 import UsersResult from "../../domain/entities/usersResult";
-import CategorysResult from "../../domain/entities/areaResult";
 import UserDatasource from "../../domain/datasourses/userDatasource";
 import AddUsersResult from "../../domain/entities/addUserResult";
 import BackendConfig from "../../../../config/backend/config";
@@ -16,20 +14,25 @@ class UserDatasourceImp extends UserDatasource {
     async getStatus(): Promise<StatusResult> {
         try {
             const response = await fetch(`${BackendConfig.url}/api/status`);
-            const jsonResponse = await response.json();
+            const responseData = await response.json();
     
-            console.log(jsonResponse);
-    
-            if (!jsonResponse) {
-                return new SavingsResult([]);
+            if (!responseData) {
+                return new StatusResult([]);
             }
     
-            const savings = jsonResponse.map((item: any) => new Saving(item.rolname, item.id));
+            const statuses = responseData.map((item: any) => {
+                const status = new Status(
+                    item.name || '',
+                    item.id
+                );
     
-            return new SavingsResult(savings);
+                return status;
+            });
+    
+            return new StatusResult(statuses);
         } catch (error) {
-            console.error("Error in getSavings:", error);
-            throw error; // Propagate the error to the calling code
+            console.error('Error fetching users:', error);
+            return new StatusResult([]);
         }
     }
     
@@ -83,15 +86,15 @@ class UserDatasourceImp extends UserDatasource {
     
             const users = responseData.map((item: any) => {
                 const user = new User(
-                    item.name || '',
-                    item.lastname || '',
-                    item.secondLastname || '',
-                    item.phone || '',
-                    item.email || '',
-                    item.address || '',
-                    item.status || '',
-                    item.area || '',
-                    item.observations || '',
+                    item.name,
+                    item.lastname ,
+                    item.secondLastname,
+                    item.phone ,
+                    item.email ,
+                    item.address ,
+                    item.status ,
+                    item.area ,
+                    item.observations ,
                     new Status(item.userStatus?.name || null, item.statusName || null),
                     new Area(item.course?.name || null, item.course?.area || null, item.areaName || null),
                     item.id
@@ -110,20 +113,26 @@ class UserDatasourceImp extends UserDatasource {
     async getArea(): Promise<AreaResult> {
         try {
             const response = await fetch(`${BackendConfig.url}/api/courses`);
-            const jsonResponse = await response.json();
+            const responseData = await response.json();
     
-            console.log(jsonResponse);
-    
-            if (!jsonResponse) {
-                return new CategorysResult([]);
+            if (!responseData) {
+                return new AreaResult([]);
             }
     
-            const savings = jsonResponse.map((item: any) => new Saving(item.name, item.id));
+            const areas = responseData.map((item: any) => {
+                const area = new Area(
+                    item.name || '',
+                    item.area || '',
+                    item.id
+                );
     
-            return new CategorysResult(savings);
+                return area;
+            });
+    
+            return new AreaResult(areas);
         } catch (error) {
-            console.error("Error in getCategory:", error);
-            throw error; // Propagate the error to the calling code
+            console.error('Error fetching users:', error);
+            return new AreaResult([]);
         }
     }
    

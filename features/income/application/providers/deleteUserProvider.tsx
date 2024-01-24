@@ -63,9 +63,6 @@ type DeleteUserActionType =
       0,
       0,
       '',
-      new Status(''),
-      new Area('', ''),
-      undefined,
       ),
     errors: {}
   }
@@ -148,7 +145,7 @@ type DeleteUserActionType =
           type: 'Set Success',
           payload: {
             success: true,
-            user: result.user[0],
+            user: result.user,
             message: result.message,
           }
         });

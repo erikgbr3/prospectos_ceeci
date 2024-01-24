@@ -3,18 +3,14 @@ import { Text, View, StyleSheet, TouchableOpacity, Alert, FlatList, ScrollView} 
 import Modal from 'react-native-modal';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { getNextColor } from '../../../../../components/colors';
-import ConfirmationModal from '../../../../../components/modal';
 import User from '../../../domain/entities/users';
-import BackendConfig from '../../../../../config/backend/config';
 import UserDeleteScreen from './deleteUserScreen';
 
-type CardProps = {
+interface CardProps {
     user : User,
     onEdit?: Function,
-    onDeleted?: Function, 
+    onDeleted?: (user: User) => void;
     searchTerm: string,
-    onCancelDelete?: Function;
 }
 
 const UserList: React.FC<CardProps> = ({
@@ -22,39 +18,26 @@ const UserList: React.FC<CardProps> = ({
     onEdit,
     onDeleted,
     searchTerm,
-    onCancelDelete,
 }) => {
-
-    const [isModalVisible, setModalVisible] = useState(false);
-
-    const [isDeleting, setIsDeleting] = useState(false);
 
     const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
 
     const [isInfoModalVisible, setInfoModalVisible] = useState(false);
-
-    const [currentColor, setCurrentColor] = useState(getNextColor());
 
     const isMatch = () => {
         const fullName = `${user.name} ${user.lastname} ${user.secondLastname} ${user.address} ${user.statusName?.name} ${user.areaName?.name} ${user.areaName?.area}`;
         return fullName.toLowerCase().includes(searchTerm.toLowerCase());
       };
     
-      // No renderizar el componente si no coincide con la búsqueda
       if (!isMatch()) {
         return null;
       }
- 
-      // ... (other state variables)
-  
-      
+    
         const handleLongPress = () => {
             setInfoModalVisible(true);
         };
 
         const handlePress = () => {
-            // Puedes agregar lógica adicional aquí si es necesario
-            // En este momento, simplemente abrirá el modal de información
             setInfoModalVisible(true);
         };
 
@@ -62,27 +45,24 @@ const UserList: React.FC<CardProps> = ({
             setInfoModalVisible(false);
         };
   
-      const handleEdit = () => {
-          setInfoModalVisible(true);
-          if (onEdit) {
-              onEdit(user);
-          }
-      };
+        const handleEdit = () => {
+            setInfoModalVisible(true);
+            if (onEdit) {
+                onEdit(user);
+            }
+        };
   
       const handleDelete = async () => {
-        setInfoModalVisible(false); // Cerrar el modal de información
-        setDeleteModalVisible(true); // Abrir el modal de eliminación
+        setInfoModalVisible(false);
+        setDeleteModalVisible(true); 
       
         if (onDeleted) {
           try {
             await onDeleted(user);
             console.log('User deleted successfully');
-            // ... (resto del código)
+            console.log('handleUpdateUser called successfully');
           } catch (error) {
             console.error('Error deleting user:', error);
-            // ... (resto del código)
-          } finally {
-            // ... (resto del código)
           }
         }
       };
@@ -94,19 +74,17 @@ const UserList: React.FC<CardProps> = ({
                     onPress={handlePress}
                     onLongPress={handleLongPress}
                 >
-                        <View style={styles.listContainer}>
-                            <View style={styles.listInfo}>
-                                <View style={styles.listInfoView}>
-                                    <Text style={styles.infoTextList}>{`${user.name} ${user.lastname} ${user.secondLastname}`}</Text>
-                                </View>
-                            </View> 
-                        </View>
+                    <View style={styles.listContainer}>
+                            <View style={styles.listInfoView}>
+                                <Text style={styles.infoTextList}>{`${user.name} ${user.lastname} ${user.secondLastname}`}</Text>
+                            </View>
+                    </View>
                 </TouchableOpacity>
 
             <View style={styles.container}>
                 <Modal isVisible={isInfoModalVisible} onBackdropPress={handleCloseInfoModal}>
                 <View style={styles.space}>
-                    <View style={{...styles.cardContainer, backgroundColor: currentColor}}>
+                    <View style={styles.cardContainer}>
                         <View style={styles.cardInfo}>
                             <View style={styles.infoView}>
                                 <Text style={styles.info}>Nombre: </Text>
@@ -175,16 +153,14 @@ const UserList: React.FC<CardProps> = ({
                 </View>
                 </Modal>
 
-                <UserDeleteScreen
-                userDelete={user}
-                isVisible={isDeleteModalVisible}
-                onDeleted={() => {
-                    // Puedes agregar lógica adicional aquí si es necesario
-                    // En este momento, simplemente cerrará el modal de eliminación
-                    setDeleteModalVisible(false);
-                  }}
-                closeModal={() => setDeleteModalVisible(false)}
-                />
+                    <UserDeleteScreen
+                    userDelete={user}
+                    isVisible={isDeleteModalVisible}
+                    onDeleted={() => {
+                        setDeleteModalVisible(false);
+                    }}
+                    closeModal={() => setDeleteModalVisible(false)}
+                    />
             </View>
         </View>
     );
@@ -236,6 +212,7 @@ const styles = StyleSheet.create({
         width: '95%',    // Reduzca el ancho de la tarjeta
         maxWidth: '100%',
         minHeight: 200,
+        backgroundColor: "#a0c9c7",
     },
     listContainer: {
         flex: 1,

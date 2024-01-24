@@ -1,7 +1,7 @@
 import User from "./users";
 
 class AddUsersResult{
-  user: User[];
+  user: User;
   error?: boolean;
   message: string;
   errors?: {
@@ -11,7 +11,7 @@ class AddUsersResult{
 
   constructor(
     message: string,
-    user: User[],
+    user: User,
 
   ){
     this.message = message,

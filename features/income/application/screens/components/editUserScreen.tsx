@@ -11,6 +11,7 @@ import Area from '../../../domain/entities/area';
 import StatusResult from '../../../domain/entities/statusResult';
 import AreaResult from '../../../domain/entities/areaResult';
 import BackendConfig from '../../../../../config/backend/config';
+import { AreaProvider, useAreaState } from '../../providers/getAreaProvider';
 
 interface UserEditViewProps {
     userEdit: User,
@@ -39,10 +40,9 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
         setUser,
     } = useEditUserState();
 
-    
-    const [status, setStatus] = useState<Status[]>([]);
+    const {areas, status, getAreas, getStatus} = useAreaState();
 
-    const [area, setArea] = useState<Area[]>([]);
+    const [showAlert, setShowAlert] = useState(false);
 
     const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
     const [selectedArea, setSelectedArea] = useState<Area | null>(null);
@@ -54,76 +54,25 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
       setUser(userEdit);
   }, [userEdit]);
 
-
-
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const statusResult = await getStatus();
-          if (statusResult) {
-            setStatus(statusResult.status);
-          }
-        } catch (error) {
-          console.error('Error fetching status:', error);
-        }
-      };
-    
-      fetchData();
-    }, []);
   
-    const getStatus = async () => {
-      return fetch(`${BackendConfig.url}/api/status`)
-        .then((response) => response.json())
-        .then((response) => {
-          if (!response) {
-            return new StatusResult([]);
-          }
-          const status = response.map((item: any) => new Status(item.name, item.id));
-          return new StatusResult(status);
-        });
-    };
+  useEffect(()=> {
+    getStatus();
+    getAreas()
+  }, []);
 
-    useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const areaResult = await getArea();
-          if (areaResult) {
-            setArea(areaResult.area);
-          }
-        } catch (error) {
-          console.error('Error fetching areas:', error);
-        }
-      };
-    
-      fetchData();
-    }, []);
-  
-    const getArea = async () => {
-      return fetch(`${BackendConfig.url}/api/courses`)
-        .then((response) => response.json())
-        .then((response) => {
-          if (!response) {
-            return new AreaResult([]);
-          }
-          const area = response.map((item: any) => new Area(item.name, item.area, item.id));
-          return new AreaResult(area);
-        });
-    };
 
     const handleSave = async (onSaved: Function) => {
       try {
         await saveUser(onSaved);
-        //updateSaving(); // Actualizar la lista de categorías
         closeModal();
 
         if (onSaved) {
           onSaved();
         }
-    
-        // Cierra el modal
+  
         closeModal();
       } catch (error: any) {
-        console.error("Error al guardar la categoría:", error);
+        console.error("Error al guardar el usuario:", error);
         console.log("Respuesta del servidor:", error.response);
     
         if (typeof error.response === 'string') {
@@ -136,10 +85,12 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
 
     useEffect(() => {
       if (success) {
-        Alert.alert('Registro Actualizado', message);
+        if (message) {
+          Alert.alert('Error', message);
+        }
         closeModal();
       } else if (message) {
-        Alert.alert('Registro Actualizado', message);
+        Alert.alert('Usuario Actualizado', message);
       }
     }, [success, message]);
   
@@ -291,7 +242,7 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
                 <View>
                 <View>
                 <SelectDropdown
-                      data={area}
+                      data={areas}
                       defaultButtonText={user?.areaName?.name}
                       onSelect={(selectedItem, index) => {
                         setSelectedArea(selectedItem);
@@ -333,7 +284,9 @@ const EditUserModal: React.FC<UserEditViewProps> = ({
 
     const EditUserScreen = (props: any) => (
       <EditUserProvider>
+        <AreaProvider>
           <EditUserModal {...props} />
+        </AreaProvider>    
       </EditUserProvider>
     );
 

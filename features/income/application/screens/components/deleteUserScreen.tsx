@@ -1,6 +1,6 @@
 import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Button } from 'react-native-paper';
-import React, { FC, useEffect, } from "react";
+import React, { FC, useEffect, useState, } from "react";
 import User from "../../../domain/entities/users";
 import { DeleteUserProvider, useDeleteUserState } from "../../providers/deleteUserProvider";
 
@@ -28,41 +28,50 @@ const DeleteUser: React.FC<UserDeleteViewProps> = ({
     setUserProp,
     deleteUser,
     setUser,
-  } = useDeleteUserState()
+  } = useDeleteUserState();
+
+  
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     setUser(userDelete);
   }, [userDelete]);
 
-  const handleDelete = async () => {
-    if (deleteUser) {
-      deleteUser(() => {
-        Alert.alert('Mensaje', 'El usuario ha sido eliminado correctamente', [
-          {
-            text: 'Muy bien',
-            onPress: () => {
-              onDeleted(userDelete);
-              closeModal(); // Cierra el modal de información
-            },
-          },
-        ]);
-      });
+const handleDelete = async () => {
+  try {
+    await deleteUser(onDeleted);
+    //updateSaving(); // Actualizar la lista de categorías
+    closeModal();
+
+    if (onDeleted) {
+      onDeleted();
     }
 
-    await deleteUser(onDeleted);
-    closeModal(); // Asegúrate de cerrar el modal después de la eliminación
-  };
+    closeModal();
+  } catch (error: any) {
+    console.error("Error al eliminar al usuario:", error);
+    console.log("Respuesta del servidor:", error.response);
+
+    if (typeof error.response === 'string') {
+      console.log("Respuesta del servidor (no JSON):", error.response);
+    } else {
+      throw error;
+    }
+  }
+};
+
 
   useEffect(() => {
     if (success) {
       if (message) {
-        Alert.alert('Usuario Borrado ', message);
+        Alert.alert('Error', message);
       }
       closeModal();
     } else if (message) {
       Alert.alert('Usuario Borrado', message);
     }
   }, [success, message]);
+
 
   return (
     <Modal

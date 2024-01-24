@@ -5,12 +5,8 @@ import Modal from 'react-native-modal';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 import SelectDropdown from 'react-native-select-dropdown';
-import StatusResult from '../../../domain/entities/statusResult';
-import Status from '../../../domain/entities/status';
-import AreaResult from '../../../domain/entities/areaResult';
-import Area from '../../../domain/entities/area';
 import { ScrollView } from 'react-native';
-import BackendConfig from '../../../../../config/backend/config';
+import { AreaProvider, useAreaState } from '../../providers/getAreaProvider';
 
 interface AddUserModalProps {
   isVisible: boolean;
@@ -26,119 +22,60 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
     user, 
     errors,
     setUserProp, 
-    saveUser} = useAddUserState();
+    saveUser
+  } = useAddUserState();
 
-  const [status, setStatus] = useState<Status[]>([]);
-  const [area, setArea] = useState<Area[]>([]);
+  const { areas, status,  getAreas, getStatus} = useAreaState();
 
-  const [selectedUser, setSelectedUser] = useState(null);
-
-  const resetForm = () => {
-    setUserProp('name', '');
-    setUserProp('lastname', '');
-    setUserProp('secondLastname', '');
-    setUserProp('phone', '');
-    setUserProp('email', '');
-    setUserProp('address', '');
-    setUserProp('observations', '');
-    setUserProp('status', 0);
-    setUserProp('area', 0);
-  };
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const statusResult = await getStatus();
-        if (statusResult) {
-          setStatus(statusResult.status);
-        }
-      } catch (error) {
-        console.error('Error fetching status:', error);
-      }
-    };
-  
-    fetchData();
+    getStatus()
+    getAreas()
   }, []);
 
-  const getStatus = async () => {
-    return fetch(`${BackendConfig.url}/api/status`)
-      .then((response) => response.json())
-      .then((response) => {
-        if (!response) {
-          return new StatusResult([]);
-        }
-        const status = response.map((item: any) => new Status(item.name, item.id));
-        return new StatusResult(status);
-      });
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const areaResult = await getArea();
-        if (areaResult) {
-          setArea(areaResult.area);
-        }
-      } catch (error) {
-        console.error('Error fetching areas:', error);
-      }
+    const handlePressSaveUser = () => {
+      handleSaveUser();
     };
   
-    fetchData();
-  }, []);
-
-  const getArea = async () => {
-    return fetch(`${BackendConfig.url}/api/courses`)
-      .then((response) => response.json())
-      .then((response) => {
-        if (!response) {
-          return new AreaResult([]);
-        }
-        const area = response.map((item: any) => new Area(item.name, item.area, item.id));
-        return new AreaResult(area);
-      });
-  };
-
-  
-  const handleSaveUser = async () => {
-    try {
-    await saveUser();
-    resetForm(); 
-    closeModal();
-    
-    } catch (error: any) {
-      console.error("Error al guardar la categoría:", error);
-      console.log("Respuesta del servidor:", error.response);
-  
-      if (typeof error.response === 'string') {
-        console.log("Respuesta del servidor (no JSON):", error.response);
-      } else {
-        throw error;
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (success) {
-      Alert.alert('Registro Exitoso', message);
-      resetForm();
+    const handlePressCloseModal = () => {
       closeModal();
-    } else if (message) {
-      Alert.alert('Registro Exitoso', message);
-    }
-
-    return () => {
-      setUserProp('errors', {});
     };
-  }, [success, message]);
+
+    const handleSaveUser = async () => {
+      try {
+        await saveUser();
+        setShowAlert(true);
+      } catch (error: any) {
+        console.error("Error al guardar al usuario:", error);
+        console.log("Respuesta del servidor:", error.response);
+  
+        if (typeof error.response === 'string') {
+          console.log("Respuesta del servidor (no JSON):", error.response);
+        } else {
+          throw error;
+        }
+      }
+    };
+
+    useEffect(() => {
+      if (success && message) {
+        Alert.alert('Usuario Registrado', message);
+        closeModal();
+      } else if (!success && message) {
+        Alert.alert('Error', message);
+        closeModal();
+      }
+    }, [success, message]);
 
   return (
-    <Modal 
+    <Modal
       animationIn='bounceInUp'
       animationOut='bounceOutDown'
       animationInTiming={500}
       animationOutTiming={500}
       isVisible={isVisible}
+      style={{ flex: 1 }}
     >
       <ScrollView>
       <View style={styles.modalContainer}>
@@ -171,10 +108,10 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               }}
               textContentType="name"
             />
-            {errors?.lastname ? (
+          </View>
+          {errors?.lastname ? (
                       <Text style={{ fontSize: 10, color: 'red' }}>{errors.lastname}</Text>
             ) : null}
-          </View>
           </View>
 
           <View>
@@ -188,10 +125,10 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               }}
               textContentType="name"
             />
-            {errors?.secondLastname ? (
+          </View>
+          {errors?.secondLastname ? (
                       <Text style={{ fontSize: 10, color: 'red' }}>{errors.secondLastname}</Text>
             ) : null}
-          </View>
           </View>
 
           <View>
@@ -205,10 +142,10 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               }}
               textContentType="telephoneNumber"
             />
-            {errors?.phone ? (
+          </View>
+          {errors?.phone ? (
                       <Text style={{ fontSize: 10, color: 'red' }}>{errors.phone}</Text>
             ) : null}
-          </View>
           </View>
 
           <View>
@@ -222,10 +159,10 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               }}
               textContentType="emailAddress"
             />
-            {errors?.email ? (
+          </View>
+          {errors?.email ? (
                       <Text style={{ fontSize: 10, color: 'red' }}>{errors.email}</Text>
             ) : null}
-          </View>
           </View>
 
           <View>
@@ -239,10 +176,10 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               }}
               textContentType="addressCityAndState"
             />
-            {errors?.address ? (
+          </View>
+          {errors?.address ? (
                       <Text style={{ fontSize: 10, color: 'red' }}>{errors.address}</Text>
             ) : null}
-          </View>
           </View>
 
           <View>
@@ -259,10 +196,10 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               }}
               textContentType="none"
             />
-            {errors?.observations ? (
+          </View>
+          {errors?.observations ? (
                       <Text style={{ fontSize: 10, color: 'red' }}>{errors.observations}</Text>
             ) : null}
-          </View>
           </View>
 
           <View>
@@ -286,18 +223,17 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               return item.name;
             }}
           />
-          {errors?.status ? (
+        </View>
+        {errors?.status ? (
                       <Text style={{ fontSize: 10, color: 'red' }}>{errors.status}</Text>
             ) : null}
-        </View>
         </View>
 
         <View>
           <Text style={styles.info2}>Área</Text>
           <View>
-          <View>
           <SelectDropdown
-            data={area}
+            data={areas}
             defaultButtonText='Selecciona aquí'
             onSelect={(selectedItem, index) => {
               if(selectedItem){
@@ -314,22 +250,22 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
               return item.name;
             }}
           />
-          {errors?.area ? (
+        </View>
+        {errors?.area ? (
                       <Text style={{ fontSize: 10, color: 'red' }}>{errors.area}</Text>
             ) : null}
         </View>
-        </View>
-        </View>
+        
         <View style={styles.buttonContainer}>
           
-          <TouchableOpacity onPress={() => handleSaveUser()}>
-            <Button style={styles.button} buttonColor='#f45572' >
-                  <Icon name="check" size={20} color="white" /> 
+          <TouchableOpacity onPress={handlePressSaveUser}>
+            <Button style={styles.button} buttonColor='#f45572'>
+              <Icon name="check" size={20} color="white" /> 
             </Button>
           </TouchableOpacity>
-          <TouchableOpacity onPress={closeModal}> 
+          <TouchableOpacity onPress={handlePressCloseModal}> 
             <Button style={styles.button} buttonColor='#6a9eda'>
-                <Icon name="close" size={20} color="white" /> 
+              <Icon name="close" size={20} color="white" /> 
             </Button>
           </TouchableOpacity>
         </View>
@@ -341,7 +277,9 @@ const AddUserModal: FC<AddUserModalProps> = ({ isVisible, closeModal }) => {
 
 const AddUserScreen = (props: any) => (
   <AddUserProvider>
-    <AddUserModal {...props} />
+    <AreaProvider>
+      <AddUserModal {...props} />
+    </AreaProvider>
   </AddUserProvider>
 );
 
